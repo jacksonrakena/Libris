@@ -76,7 +76,9 @@ namespace Libris.Net
                             case HandshakeRequestType.Status:
                                 Console.WriteLine("[Status] Received status request.");
                                 var serverListPingResponsePacket = new ServerListPingResponsePacket(LibrisMinecraftServer.ServerVersion, 
-                                    LibrisMinecraftServer.ProtocolVersion, 0, _minecraftServer.MaximumPlayers, new List<string> { }, 
+                                    LibrisMinecraftServer.ProtocolVersion, 0, _minecraftServer.MaximumPlayers, new List<PlayerListSampleEntry> {
+                                        new PlayerListSampleEntry("best_jessica", "abdc8af6-70ab-4930-ab47-c6fc4e618155")
+                                    }, 
                                     _minecraftServer.Description, _minecraftServer.Favicon.GetMinecraftFaviconString());
                                 await SendPacketAsync(serverListPingResponsePacket, stream).ConfigureAwait(false);
 

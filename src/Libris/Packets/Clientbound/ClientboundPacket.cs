@@ -15,7 +15,7 @@ namespace Libris.Packets.Clientbound
         public byte[] Pack()
         {
             var length = Converters.WriteVariableInteger(1 + Data.Length);
-            return length.Append(Id).Concat(Data).ToArray();
+            return ArrayUtilities.Combine(length.Add(Id), Data);
         }
 
         internal ClientboundPacket(byte packetId, byte[] data)

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Libris.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +9,7 @@ namespace Libris.Packets.Clientbound
     public class ServerListPingResponsePacket : ClientboundPacket
     {
         public ServerListPingResponsePacket(string serverVersion, int protocolVersion, int currentPlayers, int maximumPlayers,
-            List<string> onlinePlayerSample, string serverDescription, string faviconString = null) : base(0x00, JsonConvert.SerializeObject(
+            List<PlayerListSampleEntry> onlinePlayerSample, string serverDescription, string faviconString = null) : base(0x00, JsonConvert.SerializeObject(
                 new ServerListPingResponse(
                         new ServerListPingResponseVersion(serverVersion, protocolVersion),
                         new ServerListPingResponsePlayerList(maximumPlayers, currentPlayers, onlinePlayerSample),
@@ -66,9 +67,9 @@ namespace Libris.Packets.Clientbound
             public int OnlinePlayers { get; }
 
             [JsonProperty("sample")]
-            public List<string> OnlinePlayerSample { get; }
+            public List<PlayerListSampleEntry> OnlinePlayerSample { get; }
 
-            public ServerListPingResponsePlayerList(int maxPlayers, int onlinePlayers, List<string> sample)
+            public ServerListPingResponsePlayerList(int maxPlayers, int onlinePlayers, List<PlayerListSampleEntry> sample)
             {
                 MaximumPlayers = maxPlayers;
                 OnlinePlayers = onlinePlayers;
