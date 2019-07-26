@@ -5,35 +5,34 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Libris.Models
+namespace Libris.Packets.Clientbound
 {
-    internal class ClientboundPacket
+    public abstract class ClientboundPacket
     {
-        public byte PacketId { get; }
-        public byte[] Data { get; }
+        public byte Id { get; protected set; }
+        public byte[] Data { get; protected set; }
 
         public byte[] Pack()
         {
             var length = Converters.WriteVariableInteger(1 + Data.Length);
-            return length.Append(PacketId).Concat(Data).ToArray();
-        }
-
-        public void WriteToStream(NetworkStream stream)
-        {
-            var p = Pack();
-            stream.Write(p, 0, p.Length);
+            return length.Append(Id).Concat(Data).ToArray();
         }
 
         internal ClientboundPacket(byte packetId, byte[] data)
         {
-            PacketId = packetId;
+            Id = packetId;
             Data = data;
         }
 
         internal ClientboundPacket(byte packetId, string data)
         {
-            PacketId = packetId;
+            Id = packetId;
             Data = Converters.WriteUtf8String(data);
+        }
+
+        internal ClientboundPacket()
+        {
+
         }
     }
 }

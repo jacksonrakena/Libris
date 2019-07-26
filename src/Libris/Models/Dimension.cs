@@ -4,11 +4,10 @@ using System.Text;
 
 namespace Libris.Models
 {
-    public enum ConnectionState
+    public enum Dimension : int
     {
-        NotConnected,
-        Status,
-        Login,
-        Play
+        Nether = -1,
+        Overworld = 0,
+        End = 1
     }
 }

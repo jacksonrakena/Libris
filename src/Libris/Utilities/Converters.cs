@@ -71,11 +71,31 @@ namespace Libris.Utilities
             return bytes;
         }
 
+        public static byte[] WriteLong(long value)
+        {
+            var bytes = BitConverter.GetBytes(value);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return bytes;
+        }
+
+        public static long ReadLong(byte[] set)
+        {
+            if (BitConverter.IsLittleEndian) Array.Reverse(set);
+            return BitConverter.ToInt64(set, 0);
+        }
+
         public static string ReadUtf8String(byte[] set, out byte[] remainder)
         {
             var length = ReadVariableInteger(set, out byte[] data);
-            remainder = new ArraySegment<byte>(data, length, data.Length - length).ToArray();
-            return Encoding.UTF8.GetString(data, 0, length);
+            var bytesRemainder = new byte[length];
+            Buffer.BlockCopy(data, 0, bytesRemainder, 0, length);
+            var utf8string = Encoding.UTF8.GetString(bytesRemainder, 0, length);
+
+            var remainder0 = new byte[data.Length - length];
+            Buffer.BlockCopy(data, length, remainder0, 0, data.Length - length);
+            remainder = remainder0;
+
+            return utf8string;
         }
 
         public static byte WriteBoolean(bool value)

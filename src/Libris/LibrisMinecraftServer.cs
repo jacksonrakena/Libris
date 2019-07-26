@@ -10,6 +10,7 @@ namespace Libris
     {
         public const string ServerVersion = "1.14.4";
         public const int ProtocolVersion = 498;
+        public const int NewConnectionBufferSize = 1024;
 
         /// <summary>
         ///     The maximum number of players allowed to join the server simultaneously.
