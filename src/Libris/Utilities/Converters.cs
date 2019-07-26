@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Libris.Packets.Clientbound;
+using Libris.Packets.Serverbound;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Libris.Utilities
 {
@@ -35,6 +39,35 @@ namespace Libris.Utilities
             return result;
         }
 
+        public static int ReadVariableInteger(this BinaryReader reader)
+        {
+            var numberOfBytesRead = 0;
+            var result = 0;
+
+            byte current;
+
+            do
+            {
+                current = reader.ReadByte();
+                var value = current & 0b01111111;
+                result |= value << (7 * numberOfBytesRead);
+
+                numberOfBytesRead++;
+                if (numberOfBytesRead > 5)
+                    throw new InvalidOperationException("Data is too large to be a variable integer.");
+            }
+            while ((current & 0b10000000) != 0);
+            return result;
+        }
+        public static Task WritePacketAsync(this BinaryWriter writer, ClientboundPacket packet)
+        {
+            writer.WriteVariableInteger(packet.Data.Length + 1);
+            writer.Write(packet.Id);
+            writer.Write(packet.Data);
+            return writer.BaseStream.FlushAsync();
+        }
+
+
         public static byte[] WriteInteger(int value)
         {
             /* if(value > 0)
@@ -64,6 +97,20 @@ namespace Libris.Utilities
             return output.ToArray();
         }
 
+        public static void WriteVariableInteger(this BinaryWriter writer, int value)
+        {
+            do
+            {
+                byte temp = (byte) (value & 0b01111111);
+                value >>= 7;
+                if (value != 0)
+                {
+                    temp |= 0b10000000;
+                }
+                writer.Write(temp);
+            } while (value != 0);
+        }
+
         public static byte[] WriteUnsignedLong(ulong value)
         {
             var bytes = BitConverter.GetBytes(value);
@@ -78,11 +125,18 @@ namespace Libris.Utilities
             return bytes;
         }
 
-        public static long ReadLong(byte[] set)
+        public static ushort ReadUInt16BigEndian(this BinaryReader reader)
+        {
+            var bytes = reader.ReadBytes(2);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return BitConverter.ToUInt16(bytes);
+        }
+
+        /*public static long ReadLong(byte[] set)
         {
             if (BitConverter.IsLittleEndian) Array.Reverse(set);
             return BitConverter.ToInt64(set, 0);
-        }
+        }*/
 
         public static string ReadUtf8String(byte[] set, out byte[] remainder)
         {

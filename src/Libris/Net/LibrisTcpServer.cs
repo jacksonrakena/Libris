@@ -6,6 +6,7 @@ using Libris.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -31,45 +32,52 @@ namespace Libris.Net
             _minecraftServer = server;
         }
 
-        public Task SendPacketAsync(ClientboundPacket packet, NetworkStream streamTarget)
+        /*public Task SendPacketAsync(ClientboundPacket packet, NetworkStream streamTarget)
         {
             var packed = packet.Pack();
             Console.WriteLine($"[Outbound] Sending {packet.GetType().Name} with ID 0x{packet.Id:x2} ({packet.Data.Length} bytes)");
             return streamTarget.WriteAsync(packed, 0, packed.Length);
-        }
+        }*/
 
-        public ServerboundPacket ReadPacket(byte[] data)
+        /*public ServerboundPacket ReadPacket(byte[] data)
         {
             var packet = new ServerboundPacket(data);
             Console.WriteLine($"[Inbound] Received packet with ID 0x{packet.Id:x2}");
             return packet;
-        }
+        }*/
+
+        /*public ServerboundPacket ReadPacket(BinaryReader reader)
+        {
+            var length = reader.ReadVariableInteger();
+            var id = reader.ReadByte();
+            var data = reader.ReadBytes(length - 1);
+            return new ServerboundPacket(id, data);
+        }*/
 
         public async Task StartListeningAsync()
         {
             while (true)
             {
                 var client = await _tcpListener.AcceptTcpClientAsync();
-                byte[] buffer = new byte[LibrisMinecraftServer.NewConnectionBufferSize];
                 var stream = client.GetStream();
-                await stream.ReadAsync(buffer, 0, buffer.Length);
+                using var reader = new BinaryReader(stream, Encoding.UTF8, true);
+                using var writer = new BinaryWriter(stream, Encoding.UTF8, true);
 
-                var packet = ReadPacket(buffer);
+                var packetLength = reader.ReadVariableInteger();
+                var packetId = reader.ReadByte();
 
-                PacketReceived?.Invoke(new PacketReceivedEventArgs(client, packet));
+                //PacketReceived?.Invoke(new PacketReceivedEventArgs(client, packet));
 
-                switch (packet.Id)
+                switch (packetId)
                 {
                     case 0x00: // Should be the only opening packet received on all clients except 1.6 for Legacy Server Ping
-                        var protocolVersion = Converters.ReadVariableInteger(packet.Data, out byte[] serverAddr);
-                        var serverAddress = Converters.ReadUtf8String(serverAddr, out byte[] serverP);
-                        var serverPort = Converters.ReadUnsignedShort(serverP, out byte[] nextStateR);
-                        var curStateR = Converters.ReadVariableInteger(nextStateR, out byte[] contained);
+                        var protocolVersion = reader.ReadVariableInteger();
+                        var serverAddress = reader.ReadString();
+                        var serverPort = reader.ReadUInt16BigEndian();
+                        var curStateR = reader.ReadVariableInteger();
                         var state = curStateR == 1 ? HandshakeRequestType.Status : HandshakeRequestType.Login;
 
-                        var requestPacket = ReadPacket(contained);
-
-                        Console.WriteLine($"[Handshaking] New client connecting with protocol version {protocolVersion}, using server address {serverAddress}:{serverPort}, and is requesting action {state}, with a contained packet ID of 0x{requestPacket.Id:x2}.");
+                        Console.WriteLine($"[Handshaking] New client connecting with protocol version {protocolVersion}, using server address {serverAddress}:{serverPort}, and is requesting action {state}.");
 
                         switch (state)
                         {
@@ -80,42 +88,48 @@ namespace Libris.Net
                                         new PlayerListSampleEntry("best_jessica", "abdc8af6-70ab-4930-ab47-c6fc4e618155")
                                     }, 
                                     _minecraftServer.Description, _minecraftServer.Favicon.GetMinecraftFaviconString());
-                                await SendPacketAsync(serverListPingResponsePacket, stream).ConfigureAwait(false);
+                                await writer.WritePacketAsync(serverListPingResponsePacket).ConfigureAwait(false);
 
-                                var latencyBuffer = new byte[18];
-                                await stream.ReadAsync(latencyBuffer, 0, latencyBuffer.Length);
-                                var latencyPacket = ReadPacket(latencyBuffer);
-                                var payload = Converters.ReadLong(latencyPacket.Data);
+                                var latencyPacketLength = reader.ReadVariableInteger();
+                                var latencyPacketId = reader.ReadByte();
+                                var payload = reader.ReadInt64();
 
-                                await SendPacketAsync(new ServerListPingLatencyPacket(payload), stream).ConfigureAwait(false);
+                                await writer.WritePacketAsync(new ServerListPingLatencyPacket(payload)).ConfigureAwait(false);
 
                                 Console.WriteLine($"[Status] Closing socket.");
                                 client.Close();
                                 break;
                             case HandshakeRequestType.Login:
-                                var username = Converters.ReadUtf8String(requestPacket.Data, out var _);
+                                reader.ReadVariableInteger();
+                                reader.ReadByte();
+                                var username = reader.ReadString();
                                 Console.WriteLine("[Login] Login request initiated from user " + username);
 
                                 // <Do authorization logic here>
 
                                 // Login succeeded
-                                await SendPacketAsync(new LoginSuccessPacket("abdc8af6-70ab-4930-ab47-c6fc4e618155", "best_jessica"), stream).ConfigureAwait(false);
+                                await writer.WritePacketAsync(new LoginSuccessPacket("abdc8af6-70ab-4930-ab47-c6fc4e618155", "best_jessica")).ConfigureAwait(false);
 
                                 // Instruct client to join game
                                 var joinGamePacket = new JoinGamePacket(0, PlayerGamemode.Survival, Dimension.Overworld, WorldType.Default, 10);
-                                await SendPacketAsync(joinGamePacket, stream).ConfigureAwait(false);
+                                await writer.WritePacketAsync(joinGamePacket).ConfigureAwait(false);
 
                                 // Receive settings from client
-                                byte[] clientSettingsBuffer = new byte[80]; // Client settings object is, at maximum, 80 bytes
-                                await stream.ReadAsync(clientSettingsBuffer, 0, clientSettingsBuffer.Length);
-                                var clientSettings = ReadPacket(clientSettingsBuffer);
-                                var locale = Converters.ReadUtf8String(clientSettings.Data, out byte[] view_distance);
+                                reader.ReadVariableInteger();
+                                reader.ReadByte();
+                                var locale = reader.ReadString();
+                                var viewDistance = reader.ReadSByte();
+                                var chatMode = reader.ReadVariableInteger();
+                                var chatColors = reader.ReadBoolean();
+                                var displayedSkinPartBitMask = reader.ReadByte();
+                                var mainHand = reader.ReadVariableInteger();
+                                Console.WriteLine("[Login] User " + username + " registered client settings with locale " + locale);
 
                                 // AT SOME POINT, CHUNK SOME DATA HERE
 
                                 // Inform client of global spawn
                                 var spawnPositionPacket = new SpawnPositionPacket(25, 50, 2);
-                                await SendPacketAsync(spawnPositionPacket, stream).ConfigureAwait(false);
+                                await writer.WritePacketAsync(spawnPositionPacket).ConfigureAwait(false);
 
                                 // Send client the data of player
                                 double playerX = 1.0;
@@ -127,12 +141,12 @@ namespace Libris.Net
                                 int teleportId = 5;
 
                                 var ppalPacket = new PlayerPositionAndLookPacket(playerX, playerY, playerZ, yaw, pitch, flags, teleportId);
-                                await SendPacketAsync(ppalPacket, stream);
+                                await writer.WritePacketAsync(ppalPacket);
                                 break;
                         }
                         break;
                     default:
-                        Console.WriteLine($"Received unknown packet with ID 0x{packet.Id:x2}. Skipping.");
+                        Console.WriteLine($"Received unknown packet with ID 0x{packetId:x2}. Skipping.");
                         break;
                 }
             }

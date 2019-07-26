@@ -17,5 +17,12 @@ namespace Libris.Packets.Serverbound
             Id = Converters.ReadByte(remainder, out byte[] r0);
             Data = r0;
         }
+
+        public ServerboundPacket(byte id, byte[] data)
+        {
+            Id = id;
+            Length = data.Length + 1;
+            Data = data;
+        }
     }
 }
