@@ -37,7 +37,7 @@ namespace Libris
 
         public async Task StartAsync()
         {
-            _ = Task.Run(_tcp.StartListeningAsync);
+            _ = Task.Run(() => _tcp.StartAsync());
         }
     }
 }

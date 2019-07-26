@@ -11,6 +11,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Libris.Net
@@ -27,9 +28,10 @@ namespace Libris.Net
             _minecraftServer = server;
         }
 
-        public async Task StartListeningAsync()
+        public async Task StartAsync(CancellationToken? cancellationToken = null)
         {
-            while (true)
+            cancellationToken ??= CancellationToken.None;
+            while (!cancellationToken.Value.IsCancellationRequested)
             {
                 var client = await _tcpListener.AcceptTcpClientAsync();
                 var stream = client.GetStream();
