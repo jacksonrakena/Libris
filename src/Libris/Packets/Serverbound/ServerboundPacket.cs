@@ -13,7 +13,14 @@ namespace Libris.Packets.Serverbound
 
         public ServerboundPacket(byte[] data)
         {
-            Length = Converters.ReadVariableInteger(data, out byte[] remainder);
+            Length = Converters.ReadVariableInteger(data, out var remainder);
+            Id = Converters.ReadByte(remainder, out byte[] r0);
+            Data = r0;
+        }
+
+        public ServerboundPacket(ArraySegment<byte> data)
+        {
+            Length = Converters.ReadVariableInteger(data, out var remainder);
             Id = Converters.ReadByte(remainder, out byte[] r0);
             Data = r0;
         }
