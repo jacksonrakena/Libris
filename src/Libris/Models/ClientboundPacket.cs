@@ -9,14 +9,13 @@ namespace Libris.Models
 {
     internal class ClientboundPacket
     {
-        public int PacketId { get; }
+        public byte PacketId { get; }
         public byte[] Data { get; }
 
         public byte[] Pack()
         {
-            var packetId = Converters.WriteVariableInteger(PacketId);
-            var length = Converters.WriteVariableInteger(packetId.Length + Data.Length);
-            return length.Concat(packetId).Concat(Data).ToArray();
+            var length = Converters.WriteVariableInteger(1 + Data.Length);
+            return length.Append(PacketId).Concat(Data).ToArray();
         }
 
         public void WriteToStream(NetworkStream stream)
@@ -25,13 +24,13 @@ namespace Libris.Models
             stream.Write(p, 0, p.Length);
         }
 
-        internal ClientboundPacket(int packetId, byte[] data)
+        internal ClientboundPacket(byte packetId, byte[] data)
         {
             PacketId = packetId;
             Data = data;
         }
 
-        internal ClientboundPacket(int packetId, string data)
+        internal ClientboundPacket(byte packetId, string data)
         {
             PacketId = packetId;
             Data = Converters.WriteUtf8String(data);
