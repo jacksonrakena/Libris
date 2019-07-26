@@ -71,5 +71,11 @@ namespace Libris.Utilities
             remainder = new ArraySegment<byte>(set, 2, set.Length - 2).ToArray();
             return BitConverter.ToUInt16(new byte[2] { set[1], set[0] });
         }
+
+        public static byte ReadByte(byte[] set, out byte[] remainder)
+        {
+            remainder = new ArraySegment<byte>(set, 1, set.Length - 1).ToArray();
+            return set[0];
+        }
     }
 }
