@@ -38,17 +38,11 @@ namespace Libris.Net
             return streamTarget.WriteAsync(packed, 0, packed.Length);
         }
 
-        public ServerboundPacket ReadPacket(ArraySegment<byte> data)
+        public ServerboundPacket ReadPacket(byte[] data)
         {
             var packet = new ServerboundPacket(data);
             Console.WriteLine($"[Inbound] Received packet with ID 0x{packet.Id:x2}");
             return packet;
-        }
-
-        public void DisconnectClient(TcpClient client, string reason)
-        {
-            Console.WriteLine($"[Socket] Closing client for: " + reason);
-            client.Close();
         }
 
         public async Task StartListeningAsync()
@@ -67,10 +61,10 @@ namespace Libris.Net
                 switch (packet.Id)
                 {
                     case 0x00: // Should be the only opening packet received on all clients except 1.6 for Legacy Server Ping
-                        var protocolVersion = Converters.ReadVariableInteger(packet.Data, out var serverAddr);
-                        var serverAddress = Converters.ReadUtf8String(serverAddr, out var serverP);
-                        var serverPort = Converters.ReadUnsignedShort(serverP, out var nextStateR);
-                        var curStateR = Converters.ReadVariableInteger(nextStateR, out var contained);
+                        var protocolVersion = Converters.ReadVariableInteger(packet.Data, out byte[] serverAddr);
+                        var serverAddress = Converters.ReadUtf8String(serverAddr, out byte[] serverP);
+                        var serverPort = Converters.ReadUnsignedShort(serverP, out byte[] nextStateR);
+                        var curStateR = Converters.ReadVariableInteger(nextStateR, out byte[] contained);
                         var state = curStateR == 1 ? HandshakeRequestType.Status : HandshakeRequestType.Login;
 
                         var requestPacket = ReadPacket(contained);
@@ -95,7 +89,8 @@ namespace Libris.Net
 
                                 await SendPacketAsync(new ServerListPingLatencyPacket(payload), stream).ConfigureAwait(false);
 
-                                DisconnectClient(client, "End of server list ping response.");
+                                Console.WriteLine($"[Status] Closing socket.");
+                                client.Close();
                                 break;
                             case HandshakeRequestType.Login:
                                 var username = Converters.ReadUtf8String(requestPacket.Data, out var _);
@@ -114,7 +109,7 @@ namespace Libris.Net
                                 byte[] clientSettingsBuffer = new byte[80]; // Client settings object is, at maximum, 80 bytes
                                 await stream.ReadAsync(clientSettingsBuffer, 0, clientSettingsBuffer.Length);
                                 var clientSettings = ReadPacket(clientSettingsBuffer);
-                                var locale = Converters.ReadUtf8String(clientSettings.Data, out var _);
+                                var locale = Converters.ReadUtf8String(clientSettings.Data, out byte[] view_distance);
 
                                 // AT SOME POINT, CHUNK SOME DATA HERE
 

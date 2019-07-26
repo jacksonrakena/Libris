@@ -8,7 +8,7 @@ namespace Libris.Utilities
 {
     public static class Converters
     {
-        public static int ReadVariableInteger(ArraySegment<byte> set, out ArraySegment<byte> remainder)
+        public static int ReadVariableInteger(byte[] set, out byte[] remainder)
         {
             var numberOfBytesRead = 0;
             var result = 0;
@@ -31,7 +31,7 @@ namespace Libris.Utilities
                 }
             }
             while ((current & 0b10000000) != 0);
-            remainder = new ArraySegment<byte>(set.Array, set.Offset + numberOfBytesRead, set.Count - numberOfBytesRead);
+            remainder = new ArraySegment<byte>(set, numberOfBytesRead, set.Length - numberOfBytesRead).ToArray();
             return result;
         }
 
@@ -49,7 +49,7 @@ namespace Libris.Utilities
 
         public static byte[] WriteVariableInteger(int value)
         {
-            var output = new byte[5];
+            List<byte> output = new List<byte>();
             int cindex = 0;
             do
             {
@@ -61,7 +61,7 @@ namespace Libris.Utilities
                 }
                 output.Add(temp);
             } while (value != 0);
-            return output;
+            return output.ToArray();
         }
 
         public static byte[] WriteUnsignedLong(ulong value)
@@ -84,16 +84,16 @@ namespace Libris.Utilities
             return BitConverter.ToInt64(set, 0);
         }
 
-        public static string ReadUtf8String(ArraySegment<byte> set, out ArraySegment<byte> remainder)
+        public static string ReadUtf8String(byte[] set, out byte[] remainder)
         {
-            var lengthOfString = ReadVariableInteger(set, out ArraySegment<byte> data);
-            var stringBytes = new byte[lengthOfString];
+            var length = ReadVariableInteger(set, out byte[] data);
+            var bytesRemainder = new byte[length];
+            Buffer.BlockCopy(data, 0, bytesRemainder, 0, length);
+            var utf8string = Encoding.UTF8.GetString(bytesRemainder, 0, length);
 
-            Buffer.BlockCopy(data.Array, data.Offset, stringBytes, 0, lengthOfString);
-
-            var utf8string = Encoding.UTF8.GetString(stringBytes);
-
-            remainder = new ArraySegment<byte>(data.Array, data.Offset + lengthOfString, data.Count - lengthOfString);
+            var remainder0 = new byte[data.Length - length];
+            Buffer.BlockCopy(data, length, remainder0, 0, data.Length - length);
+            remainder = remainder0;
 
             return utf8string;
         }
@@ -110,15 +110,15 @@ namespace Libris.Utilities
             return length.Concat(str).ToArray();
         }
 
-        public static ushort ReadUnsignedShort(ArraySegment<byte> set, out byte[] remainder)
+        public static ushort ReadUnsignedShort(byte[] set, out byte[] remainder)
         {
-            remainder = new ArraySegment<byte>(set.Array, set.Offset + 2, set.Count - 2).ToArray();
+            remainder = new ArraySegment<byte>(set, 2, set.Length - 2).ToArray();
             return BitConverter.ToUInt16(new byte[2] { set[1], set[0] });
         }
 
-        public static byte ReadByte(ArraySegment<byte> set, out byte[] remainder)
+        public static byte ReadByte(byte[] set, out byte[] remainder)
         {
-            remainder = new ArraySegment<byte>(set.Array, set.Offset + 1, set.Count - 1).ToArray();
+            remainder = new ArraySegment<byte>(set, 1, set.Length - 1).ToArray();
             return set[0];
         }
 
