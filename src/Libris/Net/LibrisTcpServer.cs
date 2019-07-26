@@ -57,11 +57,15 @@ namespace Libris.Net
 
                 Console.WriteLine($"[Handshaking] New client connecting with protocol version {protocolVersion}, " +
                     $"using server address {serverAddress}:{serverPort}, " +
-                    $"and {(isRequestingStatus ? "is requesting status information." : "is requesting to login.")}.");
+                    $"and {(isRequestingStatus ? "is requesting status information" : "is requesting to login")}.");
+
+                reader.ReadVariableInteger();
+                reader.ReadByte();
 
                 if (isRequestingStatus)
                 {
                     Console.WriteLine("[Status] Received status request.");
+                    await Task.Delay(500);
                     var serverListPingResponsePacket = new ServerListPingResponsePacket(LibrisMinecraftServer.ServerVersion,
                         LibrisMinecraftServer.ProtocolVersion, 0, _minecraftServer.MaximumPlayers, new List<PlayerListSampleEntry> {
                                         new PlayerListSampleEntry("best_jessica", "abdc8af6-70ab-4930-ab47-c6fc4e618155")
@@ -71,6 +75,12 @@ namespace Libris.Net
 
                     var latencyPacketLength = reader.ReadVariableInteger();
                     var latencyPacketId = reader.ReadByte();
+                    if (latencyPacketId != 0x01)
+                    {
+                        Console.WriteLine($"[Status] Closing socket. Client did not request latency detection.");
+                        client.Close();
+                        continue;
+                    }
                     var payload = reader.ReadInt64();
 
                     await writer.WritePacketAsync(new ServerListPingLatencyPacket(payload)).ConfigureAwait(false);
@@ -80,8 +90,6 @@ namespace Libris.Net
                 }
                 else
                 {
-                    reader.ReadVariableInteger();
-                    reader.ReadByte();
                     var username = reader.ReadString();
                     Console.WriteLine("[Login] Login request initiated from user " + username);
 
