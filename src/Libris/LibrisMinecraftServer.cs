@@ -1,4 +1,5 @@
-﻿using Libris.Net;
+﻿using Libris.Models;
+using Libris.Net;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,6 +22,8 @@ namespace Libris
         ///     The description, or "message of the day", as distributed to clients.
         /// </summary>
         public string Description { get; set; } = "A server running on Libris.";
+
+        public ServerFavicon Favicon { get; set; } = ServerFavicon.FromFile("favicon.png");
 
         private readonly LibrisTcpServer _tcp;
 

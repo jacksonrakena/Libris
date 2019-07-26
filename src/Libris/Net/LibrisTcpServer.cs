@@ -77,7 +77,7 @@ namespace Libris.Net
                                 Console.WriteLine("[Status] Received status request.");
                                 var serverListPingResponsePacket = new ServerListPingResponsePacket(LibrisMinecraftServer.ServerVersion, 
                                     LibrisMinecraftServer.ProtocolVersion, 0, _minecraftServer.MaximumPlayers, new List<string> { }, 
-                                    _minecraftServer.Description);
+                                    _minecraftServer.Description, _minecraftServer.Favicon.GetMinecraftFaviconString());
                                 await SendPacketAsync(serverListPingResponsePacket, stream).ConfigureAwait(false);
 
                                 var latencyBuffer = new byte[18];

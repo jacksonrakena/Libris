@@ -8,11 +8,12 @@ namespace Libris.Packets.Clientbound
     public class ServerListPingResponsePacket : ClientboundPacket
     {
         public ServerListPingResponsePacket(string serverVersion, int protocolVersion, int currentPlayers, int maximumPlayers,
-            List<string> onlinePlayerSample, string serverDescription) : base(0x00, JsonConvert.SerializeObject(
+            List<string> onlinePlayerSample, string serverDescription, string faviconString = null) : base(0x00, JsonConvert.SerializeObject(
                 new ServerListPingResponse(
                         new ServerListPingResponseVersion(serverVersion, protocolVersion),
                         new ServerListPingResponsePlayerList(maximumPlayers, currentPlayers, onlinePlayerSample),
-                        new ServerListPingResponseDescription(serverDescription)
+                        new ServerListPingResponseDescription(serverDescription),
+                        faviconString
                     )
                 ))
         {
@@ -29,12 +30,16 @@ namespace Libris.Packets.Clientbound
             [JsonProperty("description")]
             public ServerListPingResponseDescription Description { get; }
 
+            [JsonProperty("favicon", NullValueHandling = NullValueHandling.Ignore)]
+            public string FaviconString { get; }
+
             public ServerListPingResponse(ServerListPingResponseVersion version, ServerListPingResponsePlayerList players,
-                ServerListPingResponseDescription description)
+                ServerListPingResponseDescription description, string faviconString)
             {
                 Version = version;
                 Players = players;
                 Description = description;
+                FaviconString = faviconString;
             }
         }
 
