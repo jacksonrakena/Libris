@@ -111,11 +111,10 @@ namespace Libris.Net
 
                             // AT SOME POINT, CHUNK SOME DATA HERE
                             
-                            
                             // tell client of it's spawn position
-                            var locationX = 64;
-                            var locationY = 78;
-                            var locationZ = -205;
+                            var locationX = 25;
+                            var locationY = 50;
+                            var locationZ = 2;
 
                             var locationInt = ((locationX & 0x3FFFFFF) << 38) | ((locationZ & 0x3FFFFFF) << 12) | (locationY & 0xFFF);
                             Console.WriteLine("Spawnpoint: " + locationInt);
@@ -124,7 +123,6 @@ namespace Libris.Net
                             spawnPositionPacket.WriteToStream(stream);
                             Console.WriteLine("[Login] Wrote Spawn Position to stream");
 
-                            
                             // player position and look
                             double playerX = 1.0;
                             double playerY = 1.0;
