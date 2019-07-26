@@ -35,6 +35,18 @@ namespace Libris.Utilities
             return result;
         }
 
+        public static byte[] WriteInteger(int value)
+        {
+            /* if(value > 0)
+            {
+                value = (value & (int.MaxValue >> 1));
+                value = ~value + 1;
+            }*/
+            var bytes = BitConverter.GetBytes(value);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return bytes;
+        }
+
         public static byte[] WriteVariableInteger(int value)
         {
             List<byte> output = new List<byte>();
@@ -52,11 +64,23 @@ namespace Libris.Utilities
             return output.ToArray();
         }
 
+        public static byte[] WriteUnsignedLong(ulong value)
+        {
+            var bytes = BitConverter.GetBytes(value);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return bytes;
+        }
+
         public static string ReadUtf8String(byte[] set, out byte[] remainder)
         {
             var length = ReadVariableInteger(set, out byte[] data);
             remainder = new ArraySegment<byte>(data, length, data.Length - length).ToArray();
             return Encoding.UTF8.GetString(data, 0, length);
+        }
+
+        public static byte WriteBoolean(bool value)
+        {
+            return value ? (byte) 0x01 : (byte) 0x00;
         }
 
         public static byte[] WriteUtf8String(string data)
@@ -76,6 +100,20 @@ namespace Libris.Utilities
         {
             remainder = new ArraySegment<byte>(set, 1, set.Length - 1).ToArray();
             return set[0];
+        }
+
+        public static byte[] WriteFloat(float f)
+        {
+            var bytes = BitConverter.GetBytes(f);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return bytes;
+        }
+
+        public static byte[] WriteDouble(double d)
+        {
+            var bytes = BitConverter.GetBytes(d);
+            if (BitConverter.IsLittleEndian) Array.Reverse(bytes);
+            return bytes;
         }
     }
 }

@@ -87,6 +87,65 @@ namespace Libris.Net
                             Console.WriteLine($"[Login] Wrote Login Success to stream");
 
                             // send 0x25 JOIN GAME
+
+                            var entityIdBytes = Converters.WriteInteger(0);
+                            Console.WriteLine(string.Join(" ", entityIdBytes.Select(a => a.ToString())));
+                            var gamemodeByte = (byte) 0; // survival
+                            var dimensionInt = Converters.WriteInteger(0); // overworld
+                            //var difficultyByte = (byte) 0; // peaceful REMOVED IN 1.14.4
+                            var maxPlayers = (byte) 0;
+                            var levelType = Converters.WriteUtf8String("default"); // world type
+                            var viewDistance = Converters.WriteVariableInteger(10); // view distance
+                            var reducedDebugInfo = Converters.WriteBoolean(false); // show debug data
+
+                            var packet = new ClientboundPacket(0x25, entityIdBytes.Append(gamemodeByte).Concat(dimensionInt).Append(maxPlayers).Concat(levelType).Concat(viewDistance).Append(reducedDebugInfo).ToArray());
+                            packet.WriteToStream(stream);
+                            Console.WriteLine($"[Login] Wrote Join Game to stream");
+
+                            byte[] clientSettingsBuffer = new byte[1024];
+                            var clientSettings = await stream.ReadAsync(clientSettingsBuffer);
+                            var clientSettingsLength = Converters.ReadVariableInteger(clientSettingsBuffer, out byte[] cs_packetId);
+                            var clientSettingsPacketId = Converters.ReadVariableInteger(cs_packetId, out byte[] cs_data);
+                            var locale = Converters.ReadUtf8String(cs_data, out byte[] view_distance);
+                            Console.WriteLine("[Login] Client sent client settings with locale " + locale);
+
+                            // AT SOME POINT, CHUNK SOME DATA HERE
+                            
+                            
+                            // tell client of it's spawn position
+                            var locationX = 64;
+                            var locationY = 78;
+                            var locationZ = -205;
+
+                            var locationInt = ((locationX & 0x3FFFFFF) << 38) | ((locationZ & 0x3FFFFFF) << 12) | (locationY & 0xFFF);
+                            Console.WriteLine("Spawnpoint: " + locationInt);
+                            var location = Converters.WriteUnsignedLong((ulong) locationInt);
+                            var spawnPositionPacket = new ClientboundPacket(0x49, location);
+                            spawnPositionPacket.WriteToStream(stream);
+                            Console.WriteLine("[Login] Wrote Spawn Position to stream");
+
+                            
+                            // player position and look
+                            double playerX = 1.0;
+                            double playerY = 1.0;
+                            double playerZ = 1.0;
+                            float yaw = 1.0f;
+                            float pitch = 1.0f;
+                            byte flags = 0x00;
+                            int teleportId = 5;
+
+                            var ppalData = Converters.WriteDouble(playerX)
+                                .Concat(Converters.WriteDouble(playerY))
+                                .Concat(Converters.WriteDouble(playerZ))
+                                .Concat(Converters.WriteFloat(yaw))
+                                .Concat(Converters.WriteFloat(pitch))
+                                .Append(flags)
+                                .Concat(Converters.WriteVariableInteger(teleportId))
+                                .ToArray();
+
+                            var ppalPacket = new ClientboundPacket(0x32, ppalData);
+                            ppalPacket.WriteToStream(stream);
+                            Console.WriteLine("[Login] Wrote PPAL to stream");
                         }
                         break;
                     default:
