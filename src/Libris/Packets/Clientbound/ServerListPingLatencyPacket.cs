@@ -10,7 +10,7 @@ namespace Libris.Packets.Clientbound
         public ServerListPingLatencyPacket(long confirmation)
         {
             Id = 0x01;
-            Data = Converters.WriteLong(confirmation);
+            Data = Converters.GetInt64Bytes(confirmation);
         }
     }
 }

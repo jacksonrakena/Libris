@@ -11,8 +11,9 @@ namespace Libris.Utilities
         {
             byte[] ret = new byte[arrays.Sum(x => x.Length)];
             int offset = 0;
-            foreach (var data in arrays)
+            for (var i = 0; i < arrays.Length; i++)
             {
+                var data = arrays[i];
                 Buffer.BlockCopy(data, 0, ret, offset, data.Length);
                 offset += data.Length;
             }

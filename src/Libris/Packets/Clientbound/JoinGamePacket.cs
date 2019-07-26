@@ -15,13 +15,13 @@ namespace Libris.Packets.Clientbound
             Id = 0x25;
 
             Data = ArrayUtilities.Combine(
-                Converters.WriteInteger(playerEntityId)
+                Converters.GetIntBytes(playerEntityId)
                 .Add((byte) gamemode),
-                Converters.WriteInteger((int) dimension)
+                Converters.GetIntBytes((int) dimension)
                 .Add(0),
-                Converters.WriteUtf8String(worldType.ToString()),
-                Converters.WriteVariableInteger(viewDistance)
-                .Add(Converters.WriteBoolean(!verboseDebugInfo))
+                Converters.GetStringBytes(worldType.ToString()),
+                Converters.GetVarIntBytes(viewDistance)
+                .Add(Converters.GetBoolBytes(!verboseDebugInfo))
             );
         }
     }

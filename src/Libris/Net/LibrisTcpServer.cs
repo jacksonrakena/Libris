@@ -1,7 +1,5 @@
-﻿using Libris.EventArgs;
-using Libris.Models;
+﻿using Libris.Models;
 using Libris.Packets.Clientbound;
-using Libris.Packets.Serverbound;
 using Libris.Utilities;
 using Newtonsoft.Json;
 using System;
@@ -19,9 +17,6 @@ namespace Libris.Net
 {
     internal class LibrisTcpServer
     {
-        public delegate Task PacketReceivedHandler(PacketReceivedEventArgs packetReceived);
-        public event PacketReceivedHandler PacketReceived;
-
         private readonly TcpListener _tcpListener;
         private readonly LibrisMinecraftServer _minecraftServer;
 
@@ -31,28 +26,6 @@ namespace Libris.Net
             _tcpListener.Start();
             _minecraftServer = server;
         }
-
-        /*public Task SendPacketAsync(ClientboundPacket packet, NetworkStream streamTarget)
-        {
-            var packed = packet.Pack();
-            Console.WriteLine($"[Outbound] Sending {packet.GetType().Name} with ID 0x{packet.Id:x2} ({packet.Data.Length} bytes)");
-            return streamTarget.WriteAsync(packed, 0, packed.Length);
-        }*/
-
-        /*public ServerboundPacket ReadPacket(byte[] data)
-        {
-            var packet = new ServerboundPacket(data);
-            Console.WriteLine($"[Inbound] Received packet with ID 0x{packet.Id:x2}");
-            return packet;
-        }*/
-
-        /*public ServerboundPacket ReadPacket(BinaryReader reader)
-        {
-            var length = reader.ReadVariableInteger();
-            var id = reader.ReadByte();
-            var data = reader.ReadBytes(length - 1);
-            return new ServerboundPacket(id, data);
-        }*/
 
         public async Task StartListeningAsync()
         {
@@ -65,8 +38,6 @@ namespace Libris.Net
 
                 var packetLength = reader.ReadVariableInteger();
                 var packetId = reader.ReadByte();
-
-                //PacketReceived?.Invoke(new PacketReceivedEventArgs(client, packet));
 
                 switch (packetId)
                 {

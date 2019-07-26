@@ -11,13 +11,13 @@ namespace Libris.Packets.Clientbound
         {
             Id = 0x32;
             Data = ArrayUtilities.Combine(
-                Converters.WriteDouble(playerX),
-                Converters.WriteDouble(playerY),
-                Converters.WriteDouble(playerZ),
-                Converters.WriteFloat(yaw),
-                Converters.WriteFloat(pitch)
+                Converters.GetDoubleBytes(playerX),
+                Converters.GetDoubleBytes(playerY),
+                Converters.GetDoubleBytes(playerZ),
+                Converters.GetFloatBytes(yaw),
+                Converters.GetFloatBytes(pitch)
                 .Add(flags),
-                Converters.WriteVariableInteger(teleportConfirmationId)
+                Converters.GetVarIntBytes(teleportConfirmationId)
             );
         }
     }

@@ -11,7 +11,7 @@ namespace Libris.Packets.Clientbound
         {
             Id = 0x49;
             var locationInt = ((x & 0x3FFFFFF) << 38) | ((z & 0x3FFFFFF) << 12) | (y & 0xFFF);
-            Data = Converters.WriteUnsignedLong((ulong) locationInt);
+            Data = Converters.GetUInt64Bytes((ulong) locationInt);
         }
     }
 }
