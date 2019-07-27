@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Libris.Packets.Clientbound
+namespace Libris.Net.Clientbound
 {
     internal class JoinGamePacket : ClientboundPacket
     {

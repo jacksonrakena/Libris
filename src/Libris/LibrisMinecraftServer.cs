@@ -52,7 +52,7 @@ namespace Libris
         private readonly ILogger<LibrisMinecraftServer> _logger;
         private readonly IConfiguration _serverConfig;
 
-        internal LibrisMinecraftServer(ILogger<LibrisMinecraftServer> logger, LibrisTcpServer tcp, IConfiguration configuration)
+        public LibrisMinecraftServer(ILogger<LibrisMinecraftServer> logger, LibrisTcpServer tcp, IConfiguration configuration)
         {
             _tcp = tcp;
             _logger = logger;

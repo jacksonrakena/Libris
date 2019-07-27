@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Libris.Packets.Clientbound
+namespace Libris.Net.Clientbound
 {
     internal abstract class ClientboundPacket
     {

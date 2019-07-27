@@ -1,6 +1,6 @@
 ﻿using Libris.Utilities;
 
-namespace Libris.Packets.Clientbound
+namespace Libris.Net.Clientbound
 {
     internal class ServerListPingPongPacket : ClientboundPacket
     {

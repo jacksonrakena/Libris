@@ -1,5 +1,5 @@
 ﻿using Libris.Models;
-using Libris.Packets.Clientbound;
+using Libris.Net.Clientbound;
 using Libris.Utilities;
 using Microsoft.Extensions.Logging;
 using System;
@@ -11,16 +11,16 @@ using System.Threading.Tasks;
 
 namespace Libris.Net
 {
-    internal class LibrisTcpConnection : IDisposable
+    public class LibrisTcpConnection : IDisposable
     {
         private TcpClient _sender;
         private NetworkStream _stream;
         private BinaryWriter _writer;
         private BinaryReader _reader;
         private readonly LibrisMinecraftServer _server;
-        private ILogger<LibrisTcpConnection> _logger;
+        private readonly ILogger<LibrisTcpConnection> _logger;
 
-        internal LibrisTcpConnection(LibrisMinecraftServer minecraftServer, ILogger<LibrisTcpConnection> logger)
+        public LibrisTcpConnection(LibrisMinecraftServer minecraftServer, ILogger<LibrisTcpConnection> logger)
         {
             _server = minecraftServer;
             _logger = logger;

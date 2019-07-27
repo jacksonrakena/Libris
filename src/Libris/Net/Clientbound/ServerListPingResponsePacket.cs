@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Libris.Packets.Clientbound
+namespace Libris.Net.Clientbound
 {
     internal class ServerListPingResponsePacket : ClientboundPacket
     {

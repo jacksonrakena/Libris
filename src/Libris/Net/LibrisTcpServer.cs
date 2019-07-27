@@ -1,5 +1,5 @@
 ﻿using Libris.Models;
-using Libris.Packets.Clientbound;
+using Libris.Net.Clientbound;
 using Libris.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Libris.Net
 {
-    internal class LibrisTcpServer
+    public class LibrisTcpServer
     {
         private readonly TcpListener _tcpListener;
         private readonly IServiceProvider _services;

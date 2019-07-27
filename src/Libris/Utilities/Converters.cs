@@ -1,4 +1,4 @@
-﻿using Libris.Packets.Clientbound;
+﻿using Libris.Net.Clientbound;
 using System;
 using System.Collections.Generic;
 using System.IO;
