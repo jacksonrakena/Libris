@@ -1,11 +1,12 @@
 ﻿using Libris.Models;
 using Libris.Utilities;
-using Newtonsoft.Json;
+using System.Text.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Libris.Net.Clientbound
 {
@@ -16,14 +17,13 @@ namespace Libris.Net.Clientbound
         public ServerListPingResponsePacket(string serverVersion, int protocolVersion, int currentPlayers, int maximumPlayers,
             List<PlayerListSampleEntry> onlinePlayerSample, ChatText serverDescription, string faviconString = null)
         {
-            _serializedData = JsonConvert.SerializeObject(
-                new ServerListPingResponse(
+            _serializedData = JsonSerializer.Serialize(new ServerListPingResponse(
                         new ServerListPingResponseVersion(serverVersion, protocolVersion),
                         new ServerListPingResponsePlayerList(maximumPlayers, currentPlayers, onlinePlayerSample),
                         serverDescription,
                         faviconString
-                    )
-                );
+                    ), new JsonSerializerOptions { IgnoreNullValues = true });
+            Console.WriteLine(_serializedData);
         }
 
         internal void WriteToStream(NetworkStream stream)
@@ -41,6 +41,7 @@ namespace Libris.Net.Clientbound
             lengthBytes.CopyTo(data);
             data[lengthBytes.Length] = OutboundPackets.ServerListPingResponsePacketId;
             dataVarIntPrefixBytes.Slice(0, dataVarIntLength).CopyTo(data.Slice(lengthBytes.Length + 1));
+
             Encoding.UTF8.GetBytes(_serializedData, data.Slice(dataVarIntLength + lengthBytes.Length + 1));
 
             stream.Write(data);
@@ -48,16 +49,16 @@ namespace Libris.Net.Clientbound
 
         internal class ServerListPingResponse
         {
-            [JsonProperty("version")]
+            [JsonPropertyName("version")]
             public ServerListPingResponseVersion Version { get; }
 
-            [JsonProperty("players")]
+            [JsonPropertyName("players")]
             public ServerListPingResponsePlayerList Players { get; }
 
-            [JsonProperty("description")]
+            [JsonPropertyName("description")]
             public ChatText Description { get; }
 
-            [JsonProperty("favicon", NullValueHandling = NullValueHandling.Ignore)]
+            [JsonPropertyName("favicon")]
             public string FaviconString { get; }
 
             public ServerListPingResponse(ServerListPingResponseVersion version, ServerListPingResponsePlayerList players,
@@ -72,9 +73,9 @@ namespace Libris.Net.Clientbound
 
         internal class ServerListPingResponseVersion
         {
-            [JsonProperty("name")]
+            [JsonPropertyName("name")]
             public string ServerVersion { get; }
-            [JsonProperty("protocol")]
+            [JsonPropertyName("protocol")]
             public int ProtocolVersion { get; }
 
             public ServerListPingResponseVersion(string serverVersion, int protocolVersion)
@@ -86,13 +87,13 @@ namespace Libris.Net.Clientbound
 
         internal class ServerListPingResponsePlayerList
         {
-            [JsonProperty("max")]
+            [JsonPropertyName("max")]
             public int MaximumPlayers { get; }
 
-            [JsonProperty("online")]
+            [JsonPropertyName("online")]
             public int OnlinePlayers { get; }
 
-            [JsonProperty("sample")]
+            [JsonPropertyName("sample")]
             public List<PlayerListSampleEntry> OnlinePlayerSample { get; }
 
             public ServerListPingResponsePlayerList(int maxPlayers, int onlinePlayers, List<PlayerListSampleEntry> sample)
@@ -100,18 +101,6 @@ namespace Libris.Net.Clientbound
                 MaximumPlayers = maxPlayers;
                 OnlinePlayers = onlinePlayers;
                 OnlinePlayerSample = sample;
-            }
-        }
-
-        // todo: replace with chat model
-        internal class ServerListPingResponseDescription
-        {
-            [JsonProperty("text")]
-            public string Text { get; }
-
-            public ServerListPingResponseDescription(string text)
-            {
-                Text = text;
             }
         }
     }

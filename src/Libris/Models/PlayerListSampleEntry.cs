@@ -1,15 +1,15 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Libris.Models
 {
     public class PlayerListSampleEntry
     {
-        [JsonProperty("name")]
+        [JsonPropertyName("name")]
         public string Username { get; }
 
-        [JsonProperty("id")]
+        [JsonPropertyName("id")]
         public string UUID { get; }
 
         public PlayerListSampleEntry(string username, string uuid)

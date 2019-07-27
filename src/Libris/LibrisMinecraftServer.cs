@@ -3,7 +3,6 @@ using Libris.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using System;

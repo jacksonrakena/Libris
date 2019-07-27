@@ -10,7 +10,6 @@
     <PackageReference Include="fNbt" Version="0.6.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0-preview7.19362.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.0.0-preview7.19362.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0006" />
   </ItemGroup>
 

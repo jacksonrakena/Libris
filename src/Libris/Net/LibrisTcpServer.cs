@@ -2,7 +2,6 @@
 using Libris.Net.Clientbound;
 using Libris.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
