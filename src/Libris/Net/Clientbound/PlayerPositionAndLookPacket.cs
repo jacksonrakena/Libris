@@ -10,7 +10,7 @@ namespace Libris.Net.Clientbound
         public PlayerPositionAndLookPacket(double playerX, double playerY, double playerZ, float yaw, float pitch, byte flags, int teleportConfirmationId)
         {
             Id = OutboundPackets.PlayerPositionAndLookPacketId;
-            Data = ArrayUtilities.Combine(
+            /*Data = ArrayUtilities.Combine(
                 Converters.GetDoubleBytes(playerX),
                 Converters.GetDoubleBytes(playerY),
                 Converters.GetDoubleBytes(playerZ),
@@ -18,7 +18,7 @@ namespace Libris.Net.Clientbound
                 Converters.GetFloatBytes(pitch)
                 .Add(flags),
                 Converters.GetVarIntBytes(teleportConfirmationId)
-            );
+            );*/
         }
     }
 }

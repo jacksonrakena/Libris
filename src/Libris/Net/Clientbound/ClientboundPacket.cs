@@ -10,6 +10,6 @@ namespace Libris.Net.Clientbound
     internal abstract class ClientboundPacket
     {
         public byte Id { get; protected set; }
-        public byte[] Data { get; protected set; }
+        public Memory<byte> Data { get; protected set; }
     }
 }

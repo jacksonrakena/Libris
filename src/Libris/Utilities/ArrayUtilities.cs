@@ -20,6 +20,20 @@ namespace Libris.Utilities
             return ret;
         }
 
+        public static Memory<byte> Combine(params Memory<byte>[] arrays)
+        {
+            Memory<byte> ret = new byte[arrays.Sum(x => x.Length)];
+            int offset = 0;
+            for (var i = 0; i < arrays.Length; i++)
+            {
+                var data = arrays[i];
+                data.CopyTo(ret.Slice(offset));
+
+                offset += data.Length;
+            }
+            return ret;
+        }
+
         public static byte[] Add(this byte[] set, byte value)
         {
             var newArray = new byte[set.Length + 1];

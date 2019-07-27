@@ -16,7 +16,6 @@ namespace Libris.Net
         private TcpClient _sender;
         private NetworkStream _stream;
         private BinaryWriter _writer;
-        private BinaryReader _reader;
         private readonly LibrisMinecraftServer _server;
         private readonly ILogger<LibrisTcpConnection> _logger;
 
@@ -31,7 +30,6 @@ namespace Libris.Net
             _sender.Close();
             _sender.Dispose();
             _writer.Dispose();
-            _reader.Dispose();
             _stream.Dispose();
         }
 
@@ -40,10 +38,9 @@ namespace Libris.Net
             _stream = sender.GetStream();
             _sender = sender;
             _writer = new BinaryWriter(_stream, Encoding.UTF8, true);
-            _reader = new BinaryReader(_stream, Encoding.UTF8, true);
 
-            _reader.ReadVariableInteger();
-            var packetId = _reader.ReadByte();
+             _stream.ReadVarInt(); // packet length
+            var packetId = (byte) _stream.ReadByte();
 
             if (packetId != 0x00)
             {
@@ -52,17 +49,19 @@ namespace Libris.Net
                 Dispose();
                 return;
             }
-            var protocolVersion = _reader.ReadVariableInteger();
-            var serverAddress = _reader.ReadString();
-            var serverPort = _reader.ReadUInt16BigEndian();
-            var isRequestingStatus = _reader.ReadVariableInteger() == 1;
+            var protocolVersion = _stream.ReadVarInt();
+            var serverAddress = _stream.ReadString();
+            Console.WriteLine("Server address: " + serverAddress + " protocol v: " + protocolVersion);
+
+            var serverPort = _stream.Read<ushort>();
+            var isRequestingStatus = _stream.ReadVarInt() == 1;
 
             _logger.LogDebug($"[Handshaking] New client connecting with protocol version {protocolVersion}, " +
                 $"using server address {serverAddress}:{serverPort}, " +
                 $"and {(isRequestingStatus ? "is requesting status information" : "is requesting to login")}.");
 
-            _reader.ReadVariableInteger();
-            _reader.ReadByte();
+            _stream.ReadVarInt();
+            _stream.ReadByte();
 
             if (isRequestingStatus)
             {
@@ -72,12 +71,12 @@ namespace Libris.Net
                                         new PlayerListSampleEntry("best_jessica", "abdc8af6-70ab-4930-ab47-c6fc4e618155")
                     },
                     _server.Description, _server.Favicon?.GetMinecraftFaviconString());
-                _writer.WritePacket(serverListPingResponsePacket);
+                serverListPingResponsePacket.WriteToStream(_stream);
 
                 try
                 {
-                    var latencyPacketLength = _reader.ReadVariableInteger();
-                    var latencyPacketId = _reader.ReadByte();
+                    var latencyPacketLength = _stream.ReadVarInt();
+                    var latencyPacketId = _stream.ReadByte();
 
                     if (latencyPacketId != InboundPackets.ServerListLatencyPingPacketId)
                     {
@@ -86,7 +85,7 @@ namespace Libris.Net
                         return;
                     }
 
-                    var payload = _reader.ReadInt64();
+                    var payload = _stream.Read<long>();
 
                     _writer.WritePacket(new ServerListPingPongPacket(payload));
 
@@ -101,7 +100,7 @@ namespace Libris.Net
             }
             else
             {
-                var username = _reader.ReadString();
+                var username = _stream.ReadString();
                 _logger.LogDebug("[Login] Login request initiated from user " + username);
 
                 // <Do authorization logic here>
@@ -114,20 +113,20 @@ namespace Libris.Net
                 _writer.WritePacket(joinGamePacket);
 
                 // Receive settings from client
-                _reader.ReadVariableInteger();
-                var clientSettingsId = _reader.ReadByte();
+                _stream.ReadVarInt();
+                var clientSettingsId = _stream.ReadByte();
                 if (clientSettingsId != InboundPackets.ClientSettingsPacketId)
                 {
                     _logger.LogError($"[Login] Expected byte {InboundPackets.ClientSettingsPacketId} Client Settings, received 0x{clientSettingsId:x2} instead. Closing socket.");
                     Dispose();
                     return;
                 }
-                var locale = _reader.ReadString();
-                var viewDistance = _reader.ReadSByte();
-                var chatMode = _reader.ReadVariableInteger();
-                var chatColors = _reader.ReadBoolean();
-                var displayedSkinPartBitMask = _reader.ReadByte();
-                var mainHand = _reader.ReadVariableInteger();
+                var locale = _stream.ReadString();
+                var viewDistance = _stream.Read<sbyte>();
+                var chatMode = _stream.ReadVarInt();
+                var chatColors = _stream.Read<bool>();
+                var displayedSkinPartBitMask = _stream.ReadByte();
+                var mainHand = _stream.ReadVarInt();
                 _logger.LogDebug("[Login] User " + username + " registered client settings with locale " + locale + ", view distance " + Convert.ToInt32(viewDistance) + ", and main hand " + mainHand);
 
                 // AT SOME POINT, CHUNK SOME DATA HERE

@@ -14,7 +14,7 @@ namespace Libris.Net.Clientbound
         {
             Id = OutboundPackets.JoinGamePacketId;
 
-            Data = ArrayUtilities.Combine(
+            /*Data = ArrayUtilities.Combine(
                 Converters.GetIntBytes(playerEntityId)
                 .Add((byte) gamemode),
                 Converters.GetIntBytes((int) dimension)
@@ -22,7 +22,7 @@ namespace Libris.Net.Clientbound
                 Converters.GetStringBytes(worldType.ToString()),
                 Converters.GetVarIntBytes(viewDistance)
                 .Add(Converters.GetBoolBytes(!verboseDebugInfo))
-            );
+            );*/
         }
     }
 }
