@@ -41,6 +41,7 @@ namespace Libris.Utilities
 
         public static void WritePacket(this BinaryWriter writer, ClientboundPacket packet)
         {
+            Console.WriteLine($"[Outbound] Writing packet {packet.GetType().Name}"); // to-do: get rid of this
             writer.WriteVariableInteger(packet.Data.Length + 1);
             writer.Write(packet.Id);
             writer.Write(packet.Data);

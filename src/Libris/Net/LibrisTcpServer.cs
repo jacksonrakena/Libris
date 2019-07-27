@@ -86,7 +86,7 @@ namespace Libris.Net
 
                         var payload = reader.ReadInt64();
 
-                        writer.WritePacket(new ServerListPingLatencyPacket(payload));
+                        writer.WritePacket(new ServerListPingPongPacket(payload));
 
                         Console.WriteLine($"[Status] Closing socket.");
                         client.Close();
