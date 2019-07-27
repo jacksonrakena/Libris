@@ -1,5 +1,6 @@
 ﻿using Libris.Models;
 using Libris.Net;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
@@ -36,11 +37,13 @@ namespace Libris
 
         private readonly LibrisTcpServer _tcp;
         private readonly ILogger<LibrisMinecraftServer> _logger;
+        private readonly IConfiguration _serverConfig;
 
-        public LibrisMinecraftServer(ILogger<LibrisMinecraftServer> logger, LibrisTcpServer tcp)
+        public LibrisMinecraftServer(ILogger<LibrisMinecraftServer> logger, LibrisTcpServer tcp, IConfiguration configuration)
         {
             _tcp = tcp;
             _logger = logger;
+            _serverConfig = configuration.GetSection("Server");
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -59,6 +62,18 @@ namespace Libris
                 _logger.LogWarning($"No favicon found. To enable favicons, save a 64x64 file called \"favicon.png\" into the server's directory.");
             }
 
+            var maxPlayers = _serverConfig.GetValue<int?>("MaximumPlayers");
+            var description = _serverConfig.GetValue<string>("Description");
+
+            if (description == null)
+                _logger.LogWarning("No message of the day found. To set it, set Server.Description to your desired message.");
+            else Description = description;
+
+            if (maxPlayers == null)
+                _logger.LogWarning("No maximum player count configured (defaulting to 50). To set it, set Server.MaximumPlayers to your desired maximum player count.");
+            else MaximumPlayers = maxPlayers.Value;
+
+            
             _ = _tcp.StartAsync();
 
             return Task.CompletedTask;

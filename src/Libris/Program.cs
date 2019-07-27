@@ -23,6 +23,7 @@ namespace Libris
                     serviceCollection.AddHostedService<LibrisMinecraftServerStarter>();
                     serviceCollection.AddSingleton<LibrisTcpServer>();
                     serviceCollection.AddTransient<LibrisTcpConnection>();
+                    serviceCollection.AddSingleton(hostBuilderContext.Configuration);
                 })
                 .ConfigureAppConfiguration((hostBuilderContext, configurationBuilder) =>
                 {

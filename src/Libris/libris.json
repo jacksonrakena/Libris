@@ -10,5 +10,9 @@
       "DisableColors": false,
       "TimestampFormat": "F"
     }
+  },
+  "Server": {
+    "MaximumPlayers": 50,
+    "Description": "A server running on the latest version of Libris."
   }
 }
