@@ -89,6 +89,8 @@ namespace Libris
             
             _ = _tcp.StartAsync();
 
+            _logger.LogInformation($"Libris server broadcasting on port 25565 (all addresses), with Minecraft version {ServerVersion} and protocol version {ProtocolVersion}.");
+
             return Task.CompletedTask;
         }
 
