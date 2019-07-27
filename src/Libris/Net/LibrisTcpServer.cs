@@ -77,7 +77,7 @@ namespace Libris.Net
                         var latencyPacketLength = reader.ReadVariableInteger();
                         var latencyPacketId = reader.ReadByte();
 
-                        if (latencyPacketId != InboundPackets.ClientSettingsPacketId)
+                        if (latencyPacketId != InboundPackets.ServerListLatencyPingPacketId)
                         {
                             Console.WriteLine($"[Status] Closing socket. Client did not request latency detection.");
                             client.Close();
