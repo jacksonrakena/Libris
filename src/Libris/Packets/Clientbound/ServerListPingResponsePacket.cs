@@ -1,4 +1,5 @@
 ﻿using Libris.Models;
+using Libris.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,15 +10,17 @@ namespace Libris.Packets.Clientbound
     public class ServerListPingResponsePacket : ClientboundPacket
     {
         public ServerListPingResponsePacket(string serverVersion, int protocolVersion, int currentPlayers, int maximumPlayers,
-            List<PlayerListSampleEntry> onlinePlayerSample, string serverDescription, string faviconString = null) : base(0x00, JsonConvert.SerializeObject(
+            List<PlayerListSampleEntry> onlinePlayerSample, string serverDescription, string faviconString = null)
+        {
+            Id = 0x00;
+            Data = Converters.GetStringBytes(JsonConvert.SerializeObject(
                 new ServerListPingResponse(
                         new ServerListPingResponseVersion(serverVersion, protocolVersion),
                         new ServerListPingResponsePlayerList(maximumPlayers, currentPlayers, onlinePlayerSample),
                         new ServerListPingResponseDescription(serverDescription),
                         faviconString
                     )
-                ))
-        {
+                ));
         }
 
         internal class ServerListPingResponse
