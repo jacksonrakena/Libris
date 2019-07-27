@@ -3,7 +3,8 @@
   
 A .NET Core and Common Language Runtime implementation of the Minecraft multiplayer server.   
   
-Libris aims to feature similar levels of plugin support comparable to major Minecraft server technologies, like Spigot, Paper, and the Bukkit family. Libris supports .NET Standard to allow plugins written in your .NET language of choice. (C#, F#, Visual Basic)
+Libris aims to feature similar levels of plugin support comparable to major Minecraft server technologies, like Spigot, Paper, and the Bukkit family. Libris supports .NET Standard to allow plugins written in your .NET language of choice. (C#, F#, Visual Basic)  
+Libris also has a [Discord server](https://discord.gg/RsRps9M) you can join, for help or discussion (or memes).
 
 ### Goals
 The lead developer of this project is [Abyssal](http://github.com/abyssal512).  
