@@ -8,7 +8,7 @@
     "Console": {
       "IncludeScopes": true,
       "DisableColors": false,
-      "TimestampFormat": "F"
+      "TimestampFormat": "u"
     }
   },
   "Server": {
@@ -23,8 +23,19 @@
           "Colour": "reset"
         },
         {
-          "Text": "A .NET Core server",
-          "Colour": "light_purple"
+          "Text": "A ",
+          "Colour": "light_purple",
+          "Subcomponents": [
+            {
+              "Text": ".NET",
+              "IsBold": true,
+              "IsUnderlined": true
+            },
+            {
+              "Text": " Minecraft Server",
+              "IsBold": false
+            }
+          ]
         }
       ]
     }
