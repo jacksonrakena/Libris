@@ -39,12 +39,11 @@ namespace Libris.Utilities
             return result;
         }
 
-        public static Task WritePacketAsync(this BinaryWriter writer, ClientboundPacket packet)
+        public static void WritePacket(this BinaryWriter writer, ClientboundPacket packet)
         {
             writer.WriteVariableInteger(packet.Data.Length + 1);
             writer.Write(packet.Id);
             writer.Write(packet.Data);
-            return writer.BaseStream.FlushAsync();
         }
 
         public static void WriteVariableInteger(this BinaryWriter writer, int value)

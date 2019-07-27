@@ -65,28 +65,37 @@ namespace Libris.Net
                 if (isRequestingStatus)
                 {
                     Console.WriteLine("[Status] Received status request.");
-                    await Task.Delay(500);
                     var serverListPingResponsePacket = new ServerListPingResponsePacket(LibrisMinecraftServer.ServerVersion,
                         LibrisMinecraftServer.ProtocolVersion, 0, _minecraftServer.MaximumPlayers, new List<PlayerListSampleEntry> {
                                         new PlayerListSampleEntry("best_jessica", "abdc8af6-70ab-4930-ab47-c6fc4e618155")
                         },
-                        _minecraftServer.Description, _minecraftServer.Favicon.GetMinecraftFaviconString());
-                    await writer.WritePacketAsync(serverListPingResponsePacket).ConfigureAwait(false);
-
-                    var latencyPacketLength = reader.ReadVariableInteger();
-                    var latencyPacketId = reader.ReadByte();
-                    if (latencyPacketId != 0x01)
+                        _minecraftServer.Description, _minecraftServer.Favicon?.GetMinecraftFaviconString());
+                    writer.WritePacket(serverListPingResponsePacket);
+                    
+                    try
                     {
-                        Console.WriteLine($"[Status] Closing socket. Client did not request latency detection.");
+                        var latencyPacketLength = reader.ReadVariableInteger();
+                        var latencyPacketId = reader.ReadByte();
+
+                        if (latencyPacketId != 0x01)
+                        {
+                            Console.WriteLine($"[Status] Closing socket. Client did not request latency detection.");
+                            client.Close();
+                            continue;
+                        }
+
+                        var payload = reader.ReadInt64();
+
+                        writer.WritePacket(new ServerListPingLatencyPacket(payload));
+
+                        Console.WriteLine($"[Status] Closing socket.");
+                        client.Close();
+                    } catch (EndOfStreamException)
+                    {
+                        Console.WriteLine($"[Status] Closing socket. Client did not request latency detection - received End of Stream.");
                         client.Close();
                         continue;
                     }
-                    var payload = reader.ReadInt64();
-
-                    await writer.WritePacketAsync(new ServerListPingLatencyPacket(payload)).ConfigureAwait(false);
-
-                    Console.WriteLine($"[Status] Closing socket.");
-                    client.Close();
                 }
                 else
                 {
@@ -96,11 +105,11 @@ namespace Libris.Net
                     // <Do authorization logic here>
 
                     // Login succeeded
-                    await writer.WritePacketAsync(new LoginSuccessPacket("abdc8af6-70ab-4930-ab47-c6fc4e618155", "best_jessica")).ConfigureAwait(false);
+                    writer.WritePacket(new LoginSuccessPacket("abdc8af6-70ab-4930-ab47-c6fc4e618155", "best_jessica"));
 
                     // Instruct client to join game
                     var joinGamePacket = new JoinGamePacket(0, PlayerGamemode.Survival, Dimension.Overworld, WorldType.Default, 10);
-                    await writer.WritePacketAsync(joinGamePacket).ConfigureAwait(false);
+                    writer.WritePacket(joinGamePacket);
 
                     // Receive settings from client
                     reader.ReadVariableInteger();
@@ -117,7 +126,7 @@ namespace Libris.Net
 
                     // Inform client of global spawn
                     var spawnPositionPacket = new SpawnPositionPacket(25, 50, 2);
-                    await writer.WritePacketAsync(spawnPositionPacket).ConfigureAwait(false);
+                    writer.WritePacket(spawnPositionPacket);
 
                     // Send client the data of player
                     double playerX = 1.0;
@@ -129,7 +138,7 @@ namespace Libris.Net
                     int teleportId = 5;
 
                     var ppalPacket = new PlayerPositionAndLookPacket(playerX, playerY, playerZ, yaw, pitch, flags, teleportId);
-                    await writer.WritePacketAsync(ppalPacket);
+                    writer.WritePacket(ppalPacket);
                 }
             }
         }

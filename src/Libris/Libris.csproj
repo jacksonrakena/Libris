@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="fNbt" Version="0.6.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0006" />
   </ItemGroup>
 
 </Project>
