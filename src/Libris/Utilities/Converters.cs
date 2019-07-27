@@ -69,8 +69,7 @@ namespace Libris.Utilities
 
         public static byte[] GetVarIntBytes(int value)
         {
-            var output = new byte[5];
-            var cindex = 0;
+            var output = new List<byte>(5);
             do
             {
                 byte temp = (byte) (value & 0b01111111);
@@ -79,10 +78,9 @@ namespace Libris.Utilities
                 {
                     temp |= 0b10000000;
                 }
-                output[cindex] = temp;
-                cindex++;
+                output.Add(temp);
             } while (value != 0);
-            return output;
+            return output.ToArray();
         }
 
         public static byte[] GetUInt64Bytes(ulong value)

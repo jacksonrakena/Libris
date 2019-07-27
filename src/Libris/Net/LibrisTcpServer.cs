@@ -92,7 +92,7 @@ namespace Libris.Net
                         client.Close();
                     } catch (EndOfStreamException)
                     {
-                        Console.WriteLine($"[Status] Closing socket. Client did not request latency detection - received End of Stream.");
+                        Console.WriteLine($"[Status] Closing socket. Client did not request latency detection - received End of Stream. Perhaps the response data was corrupt?");
                         client.Close();
                         continue;
                     }
