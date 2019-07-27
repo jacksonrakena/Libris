@@ -12,7 +12,7 @@ namespace Libris.Packets.Clientbound
         public ServerListPingResponsePacket(string serverVersion, int protocolVersion, int currentPlayers, int maximumPlayers,
             List<PlayerListSampleEntry> onlinePlayerSample, string serverDescription, string faviconString = null)
         {
-            Id = 0x00;
+            Id = OutboundPackets.ServerListPingResponsePacketId;
             Data = Converters.GetStringBytes(JsonConvert.SerializeObject(
                 new ServerListPingResponse(
                         new ServerListPingResponseVersion(serverVersion, protocolVersion),

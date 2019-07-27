@@ -77,7 +77,7 @@ namespace Libris.Net
                         var latencyPacketLength = reader.ReadVariableInteger();
                         var latencyPacketId = reader.ReadByte();
 
-                        if (latencyPacketId != 0x01)
+                        if (latencyPacketId != InboundPackets.ClientSettingsPacketId)
                         {
                             Console.WriteLine($"[Status] Closing socket. Client did not request latency detection.");
                             client.Close();
@@ -113,14 +113,20 @@ namespace Libris.Net
 
                     // Receive settings from client
                     reader.ReadVariableInteger();
-                    reader.ReadByte();
+                    var clientSettingsId = reader.ReadByte();
+                    if (clientSettingsId != InboundPackets.ClientSettingsPacketId)
+                    {
+                        Console.WriteLine($"[Login] Expected byte {InboundPackets.ClientSettingsPacketId} Client Settings, received 0x{clientSettingsId:x2} instead. Closing socket.");
+                        client.Close();
+                        continue;
+                    }
                     var locale = reader.ReadString();
                     var viewDistance = reader.ReadSByte();
                     var chatMode = reader.ReadVariableInteger();
                     var chatColors = reader.ReadBoolean();
                     var displayedSkinPartBitMask = reader.ReadByte();
                     var mainHand = reader.ReadVariableInteger();
-                    Console.WriteLine("[Login] User " + username + " registered client settings with locale " + locale);
+                    Console.WriteLine("[Login] User " + username + " registered client settings with locale " + locale  + ", view distance " + Convert.ToInt32(viewDistance) + ", and main hand " + mainHand);
 
                     // AT SOME POINT, CHUNK SOME DATA HERE
 

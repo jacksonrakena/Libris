@@ -9,7 +9,7 @@ namespace Libris.Packets.Clientbound
     {
         public SpawnPositionPacket(int x, int y, int z)
         {
-            Id = 0x49;
+            Id = OutboundPackets.SpawnPositionPacketId;
             var locationInt = ((x & 0x3FFFFFF) << 38) | ((z & 0x3FFFFFF) << 12) | (y & 0xFFF);
             Data = Converters.GetUInt64Bytes((ulong) locationInt);
         }

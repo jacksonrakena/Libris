@@ -9,7 +9,7 @@ namespace Libris.Packets.Clientbound
     {
         public PlayerPositionAndLookPacket(double playerX, double playerY, double playerZ, float yaw, float pitch, byte flags, int teleportConfirmationId)
         {
-            Id = 0x32;
+            Id = OutboundPackets.PlayerPositionAndLookPacketId;
             Data = ArrayUtilities.Combine(
                 Converters.GetDoubleBytes(playerX),
                 Converters.GetDoubleBytes(playerY),

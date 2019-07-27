@@ -6,7 +6,7 @@ namespace Libris.Packets.Clientbound
     {
         public ServerListPingPongPacket(long confirmation)
         {
-            Id = 0x01;
+            Id = OutboundPackets.ServerListPingPongPacketId;
             Data = Converters.GetInt64Bytes(confirmation);
         }
     }

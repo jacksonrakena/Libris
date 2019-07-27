@@ -9,7 +9,7 @@ namespace Libris.Packets.Clientbound
     {
         public LoginSuccessPacket(string uuid, string username)
         {
-            Id = 0x02;
+            Id = OutboundPackets.LoginSuccessPacketId;
             var uuidBytes = Converters.GetStringBytes(uuid);
             var usernameBytes = Converters.GetStringBytes(username);
             Data = ArrayUtilities.Combine(uuidBytes, usernameBytes);

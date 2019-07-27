@@ -12,7 +12,7 @@ namespace Libris.Packets.Clientbound
         public JoinGamePacket(int playerEntityId, PlayerGamemode gamemode,
             Dimension dimension, WorldType worldType, int viewDistance, bool verboseDebugInfo = true)
         {
-            Id = 0x25;
+            Id = OutboundPackets.JoinGamePacketId;
 
             Data = ArrayUtilities.Combine(
                 Converters.GetIntBytes(playerEntityId)
