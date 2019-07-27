@@ -13,6 +13,20 @@
   },
   "Server": {
     "MaximumPlayers": 50,
-    "Description": "A server running on the latest version of Libris."
+    "Description": {
+      "Text": "Libris",
+      "Colour": "aqua",
+      "IsBold": "true",
+      "Subcomponents": [
+        {
+          "Text": " - ",
+          "Colour": "reset"
+        },
+        {
+          "Text": "A .NET Core server",
+          "Colour": "light_purple"
+        }
+      ]
+    }
   }
 }

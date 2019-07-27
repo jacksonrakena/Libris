@@ -3,6 +3,7 @@ using Libris.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using System;
@@ -28,7 +29,10 @@ namespace Libris
         /// <summary>
         ///     The description, or "message of the day", as distributed to clients.
         /// </summary>
-        public string Description { get; set; } = "A server running on Libris.";
+        public ChatText Description { get; set; } = new ChatText("A")
+                    .SetColour(MinecraftColour.White)
+                    .AddSubcomponent(new ChatText(" Libris ").SetBold(true).SetColour(MinecraftColour.Cyan))
+                    .AddSubcomponent(new ChatText("Server").SetColour(MinecraftColour.White));
 
         /// <summary>
         ///     The server's favicon, shown in Minecraft clients next to the server's name.
@@ -63,7 +67,7 @@ namespace Libris
             }
 
             var maxPlayers = _serverConfig.GetValue<int?>("MaximumPlayers");
-            var description = _serverConfig.GetValue<string>("Description");
+            var description = _serverConfig.GetSection("Description").Get<ChatText>();
 
             if (description == null)
                 _logger.LogWarning("No message of the day found. To set it, set Server.Description to your desired message.");

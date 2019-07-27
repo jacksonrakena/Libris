@@ -10,17 +10,18 @@ namespace Libris.Packets.Clientbound
     public class ServerListPingResponsePacket : ClientboundPacket
     {
         public ServerListPingResponsePacket(string serverVersion, int protocolVersion, int currentPlayers, int maximumPlayers,
-            List<PlayerListSampleEntry> onlinePlayerSample, string serverDescription, string faviconString = null)
+            List<PlayerListSampleEntry> onlinePlayerSample, ChatText serverDescription, string faviconString = null)
         {
             Id = OutboundPackets.ServerListPingResponsePacketId;
-            Data = Converters.GetStringBytes(JsonConvert.SerializeObject(
+            var stringSerialized = JsonConvert.SerializeObject(
                 new ServerListPingResponse(
                         new ServerListPingResponseVersion(serverVersion, protocolVersion),
                         new ServerListPingResponsePlayerList(maximumPlayers, currentPlayers, onlinePlayerSample),
-                        new ServerListPingResponseDescription(serverDescription),
+                        serverDescription,
                         faviconString
                     )
-                ));
+                );
+            Data = Converters.GetStringBytes(stringSerialized);
         }
 
         internal class ServerListPingResponse
@@ -32,13 +33,13 @@ namespace Libris.Packets.Clientbound
             public ServerListPingResponsePlayerList Players { get; }
 
             [JsonProperty("description")]
-            public ServerListPingResponseDescription Description { get; }
+            public ChatText Description { get; }
 
             [JsonProperty("favicon", NullValueHandling = NullValueHandling.Ignore)]
             public string FaviconString { get; }
 
             public ServerListPingResponse(ServerListPingResponseVersion version, ServerListPingResponsePlayerList players,
-                ServerListPingResponseDescription description, string faviconString)
+                ChatText description, string faviconString)
             {
                 Version = version;
                 Players = players;
