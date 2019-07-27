@@ -1,6 +1,7 @@
 ﻿using Libris.Models;
 using Libris.Packets.Clientbound;
 using Libris.Utilities;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,22 +13,17 @@ namespace Libris.Net
 {
     public class LibrisTcpConnection : IDisposable
     {
-        private readonly TcpClient _sender;
-        private readonly NetworkStream _stream;
-        private readonly BinaryWriter _writer;
-        private readonly BinaryReader _reader;
-        private readonly LibrisTcpServer _tcp;
-        private LibrisMinecraftServer Server => _tcp.libris;
-        private readonly int _connectionId;
+        private TcpClient _sender;
+        private NetworkStream _stream;
+        private BinaryWriter _writer;
+        private BinaryReader _reader;
+        private readonly LibrisMinecraftServer _server;
+        private ILogger<LibrisTcpConnection> _logger;
 
-        public LibrisTcpConnection(TcpClient sender, LibrisTcpServer server, int connectionId)
+        public LibrisTcpConnection(LibrisMinecraftServer minecraftServer, ILogger<LibrisTcpConnection> logger)
         {
-            _stream = sender.GetStream();
-            _sender = sender;
-            _writer = new BinaryWriter(_stream, Encoding.UTF8, true);
-            _reader = new BinaryReader(_stream, Encoding.UTF8, true);
-            _tcp = server;
-            _connectionId = connectionId;
+            _server = minecraftServer;
+            _logger = logger;
         }
 
         public void Dispose()
@@ -37,18 +33,22 @@ namespace Libris.Net
             _writer.Dispose();
             _reader.Dispose();
             _stream.Dispose();
-            _tcp.RemoveConnection(_connectionId);
         }
 
-        public async Task HandleAsync()
+        public async Task HandleAsync(TcpClient sender)
         {
+            _stream = sender.GetStream();
+            _sender = sender;
+            _writer = new BinaryWriter(_stream, Encoding.UTF8, true);
+            _reader = new BinaryReader(_stream, Encoding.UTF8, true);
+
             _reader.ReadVariableInteger();
             var packetId = _reader.ReadByte();
 
             if (packetId != 0x00)
             {
-                if (packetId == 0xFE) Console.WriteLine("Received 0xFE Legacy Ping packet, the server must have sent the client incorrect data. Skipping.");
-                else Console.WriteLine($"Received unknown packet with ID 0x{packetId:x2}. Skipping.");
+                if (packetId == 0xFE) _logger.LogError("Received 0xFE Legacy Ping packet, the server must have sent the client incorrect data. Skipping.");
+                else _logger.LogError($"Received unknown packet with ID 0x{packetId:x2}. Skipping.");
                 Dispose();
                 return;
             }
@@ -57,7 +57,7 @@ namespace Libris.Net
             var serverPort = _reader.ReadUInt16BigEndian();
             var isRequestingStatus = _reader.ReadVariableInteger() == 1;
 
-            Console.WriteLine($"[Handshaking] New client connecting with protocol version {protocolVersion}, " +
+            _logger.LogDebug($"[Handshaking] New client connecting with protocol version {protocolVersion}, " +
                 $"using server address {serverAddress}:{serverPort}, " +
                 $"and {(isRequestingStatus ? "is requesting status information" : "is requesting to login")}.");
 
@@ -66,12 +66,12 @@ namespace Libris.Net
 
             if (isRequestingStatus)
             {
-                Console.WriteLine("[Status] Received status request.");
+                _logger.LogDebug("[Status] Received status request.");
                 var serverListPingResponsePacket = new ServerListPingResponsePacket(LibrisMinecraftServer.ServerVersion,
-                    LibrisMinecraftServer.ProtocolVersion, 0, Server.MaximumPlayers, new List<PlayerListSampleEntry> {
+                    LibrisMinecraftServer.ProtocolVersion, 0, _server.MaximumPlayers, new List<PlayerListSampleEntry> {
                                         new PlayerListSampleEntry("best_jessica", "abdc8af6-70ab-4930-ab47-c6fc4e618155")
                     },
-                    Server.Description, Server.Favicon?.GetMinecraftFaviconString());
+                    _server.Description, _server.Favicon?.GetMinecraftFaviconString());
                 _writer.WritePacket(serverListPingResponsePacket);
 
                 try
@@ -81,7 +81,7 @@ namespace Libris.Net
 
                     if (latencyPacketId != InboundPackets.ServerListLatencyPingPacketId)
                     {
-                        Console.WriteLine($"[Status] Closing socket. Client did not request latency detection.");
+                        _logger.LogInformation($"[Status] Closing socket. Client did not request latency detection.");
                         Dispose();
                         return;
                     }
@@ -90,19 +90,19 @@ namespace Libris.Net
 
                     _writer.WritePacket(new ServerListPingPongPacket(payload));
 
-                    Console.WriteLine($"[Status] Closing socket.");
+                    _logger.LogDebug($"[Status] Closing socket.");
                     Dispose();
                 }
                 catch (EndOfStreamException)
                 {
-                    Console.WriteLine($"[Status] Closing socket. Client did not request latency detection - received End of Stream. Perhaps the response data was corrupt?");
+                    _logger.LogDebug($"[Status] Closing socket. Client did not request latency detection - received End of Stream. Perhaps the response data was corrupt?");
                     Dispose();
                 }
             }
             else
             {
                 var username = _reader.ReadString();
-                Console.WriteLine("[Login] Login request initiated from user " + username);
+                _logger.LogDebug("[Login] Login request initiated from user " + username);
 
                 // <Do authorization logic here>
 
@@ -118,7 +118,7 @@ namespace Libris.Net
                 var clientSettingsId = _reader.ReadByte();
                 if (clientSettingsId != InboundPackets.ClientSettingsPacketId)
                 {
-                    Console.WriteLine($"[Login] Expected byte {InboundPackets.ClientSettingsPacketId} Client Settings, received 0x{clientSettingsId:x2} instead. Closing socket.");
+                    _logger.LogError($"[Login] Expected byte {InboundPackets.ClientSettingsPacketId} Client Settings, received 0x{clientSettingsId:x2} instead. Closing socket.");
                     Dispose();
                     return;
                 }
@@ -128,7 +128,7 @@ namespace Libris.Net
                 var chatColors = _reader.ReadBoolean();
                 var displayedSkinPartBitMask = _reader.ReadByte();
                 var mainHand = _reader.ReadVariableInteger();
-                Console.WriteLine("[Login] User " + username + " registered client settings with locale " + locale + ", view distance " + Convert.ToInt32(viewDistance) + ", and main hand " + mainHand);
+                _logger.LogDebug("[Login] User " + username + " registered client settings with locale " + locale + ", view distance " + Convert.ToInt32(viewDistance) + ", and main hand " + mainHand);
 
                 // AT SOME POINT, CHUNK SOME DATA HERE
 

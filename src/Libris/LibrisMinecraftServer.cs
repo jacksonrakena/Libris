@@ -1,5 +1,7 @@
 ﻿using Libris.Models;
 using Libris.Net;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using System;
@@ -11,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Libris
 {
-    public class LibrisMinecraftServer
+    public class LibrisMinecraftServer : IHostedService
     {
         public const string ServerVersion = "1.14.4";
         public const int ProtocolVersion = 498;
@@ -33,13 +35,15 @@ namespace Libris
         public ServerFavicon Favicon { get; set; }
 
         private readonly LibrisTcpServer _tcp;
+        private readonly ILogger<LibrisMinecraftServer> _logger;
 
-        public LibrisMinecraftServer()
+        public LibrisMinecraftServer(ILogger<LibrisMinecraftServer> logger, LibrisTcpServer tcp)
         {
-            _tcp = new LibrisTcpServer(this);
+            _tcp = tcp;
+            _logger = logger;
         }
 
-        public async Task StartAsync(CancellationToken? cancellationToken = null)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
             if (File.Exists("favicon.png"))
             {
@@ -48,10 +52,21 @@ namespace Libris
                 if (faviconImage.Width > 64) throw new InvalidOperationException("The provided favicon.png is more than 64 pixels wide.");
                 Favicon = ServerFavicon.FromBase64String(faviconImage.ToBase64String(PngFormat.Instance));
 
-                Console.WriteLine($"[Startup] Loaded server favicon ({faviconImage.Height}x{faviconImage.Width}) from file favicon.png");
+                _logger.LogInformation($"Loaded server favicon ({faviconImage.Height}x{faviconImage.Width}) from file favicon.png");
+            }
+            else
+            {
+                _logger.LogWarning($"No favicon found. To enable favicons, save a 64x64 file called \"favicon.png\" into the server's directory.");
             }
 
-            _ = _tcp.StartAsync(cancellationToken);
+            _ = _tcp.StartAsync();
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return _tcp.StopAsync();
         }
     }
 }

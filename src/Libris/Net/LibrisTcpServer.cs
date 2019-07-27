@@ -1,6 +1,7 @@
 ﻿using Libris.Models;
 using Libris.Packets.Clientbound;
 using Libris.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -19,45 +20,33 @@ namespace Libris.Net
     public class LibrisTcpServer
     {
         private readonly TcpListener _tcpListener;
-        internal readonly LibrisMinecraftServer libris;
+        private readonly IServiceProvider _services;
 
-        internal Dictionary<int, LibrisTcpConnection> Connections = new Dictionary<int, LibrisTcpConnection>();
-        private int nextKey = 0;
+        private CancellationTokenSource _cts;
 
-
-        public LibrisTcpServer(LibrisMinecraftServer server)
+        public LibrisTcpServer(IServiceProvider services)
         {
             _tcpListener = new TcpListener(IPAddress.Any, 25565);
+            _services = services;
             _tcpListener.Start();
-            libris = server;
         }
 
-        public async Task StartAsync(CancellationToken? cancellationToken = null)
+        public async Task StartAsync()
         {
-            cancellationToken ??= CancellationToken.None;
-            while (!cancellationToken.Value.IsCancellationRequested)
+            _cts = new CancellationTokenSource();
+            while (!_cts.IsCancellationRequested)
             {
                 var client = await _tcpListener.AcceptTcpClientAsync();
 
-                var conn = CreateConnection(client);
-                _ = conn.HandleAsync();
+                var conn = _services.GetRequiredService<LibrisTcpConnection>();
+                _ = conn.HandleAsync(client);
             }
         }
 
-        public LibrisTcpConnection CreateConnection(TcpClient client)
+        public Task StopAsync()
         {
-            var conn = new LibrisTcpConnection(client, this, nextKey);
-            Connections[nextKey] = conn;
-            Console.WriteLine($"[TCP Server] Created connection " + nextKey);
-            nextKey++;
-            return conn;
-        }
-
-        public bool RemoveConnection(int connectionId)
-        {
-            var success = Connections.Remove(connectionId);
-            Console.WriteLine($"[TCP Server] {(success ? "Removed" : "Failed to remove" )} connection " + connectionId);
-            return success;
+            _cts.Cancel();
+            return Task.CompletedTask;
         }
     }
 }

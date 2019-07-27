@@ -1,5 +1,10 @@
 ﻿using Libris.Net;
 using Libris.Utilities;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
 using System;
 using System.Linq;
 using System.Text;
@@ -11,15 +16,25 @@ namespace Libris
     {
         static void Main(string[] args)
         {
-            MainAsync().GetAwaiter().GetResult();
-        }
-
-        public static async Task MainAsync()
-        {
-            var server = new LibrisMinecraftServer();
-            await server.StartAsync();
-            Console.WriteLine("Now listening for connections on port 25565 on all addresses.");
-            await Task.Delay(-1);
+            new HostBuilder()
+                .ConfigureServices((hostBuilderContext, serviceCollection) =>
+                {
+                    serviceCollection.AddSingleton<LibrisMinecraftServer>();
+                    serviceCollection.AddHostedService<LibrisMinecraftServerStarter>();
+                    serviceCollection.AddSingleton<LibrisTcpServer>();
+                    serviceCollection.AddTransient<LibrisTcpConnection>();
+                })
+                .ConfigureAppConfiguration((hostBuilderContext, configurationBuilder) =>
+                {
+                    configurationBuilder.AddJsonFile("libris.json", false, true);
+                })
+                .ConfigureLogging((hostBuilderContext, loggingBuilder) =>
+                {
+                    loggingBuilder.AddConfiguration(hostBuilderContext.Configuration.GetSection("Logging"));
+                    loggingBuilder.AddConsole();
+                })
+                .RunConsoleAsync()
+                .GetAwaiter().GetResult();
         }
     }
 }
