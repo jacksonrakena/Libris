@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Libris.Packets.Clientbound
 {
-    public class ServerListPingResponsePacket : ClientboundPacket
+    internal class ServerListPingResponsePacket : ClientboundPacket
     {
         public ServerListPingResponsePacket(string serverVersion, int protocolVersion, int currentPlayers, int maximumPlayers,
             List<PlayerListSampleEntry> onlinePlayerSample, ChatText serverDescription, string faviconString = null)

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Libris.Packets.Clientbound
 {
-    public abstract class ClientboundPacket
+    internal abstract class ClientboundPacket
     {
         public byte Id { get; protected set; }
         public byte[] Data { get; protected set; }

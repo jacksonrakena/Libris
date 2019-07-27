@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Libris.Utilities
 {
-    public static class Converters
+    internal static class Converters
     {
         public static ushort ReadUInt16BigEndian(this BinaryReader reader)
         {

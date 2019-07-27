@@ -4,13 +4,13 @@ using System.Text;
 
 namespace Libris.Utilities
 {
-    public static class InboundPackets
+    internal static class InboundPackets
     {
         public const byte ClientSettingsPacketId = 0x05;
         public const byte ServerListLatencyPingPacketId = 0x01;
     }
-    
-    public static class OutboundPackets
+
+    internal static class OutboundPackets
     {
         public const byte JoinGamePacketId = 0x25;
         public const byte LoginSuccessPacketId = 0x02;

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Libris.Utilities
 {
-    public static class ArrayUtilities
+    internal static class ArrayUtilities
     {
         public static byte[] Combine(params byte[][] arrays)
         {

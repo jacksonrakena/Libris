@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Libris.Packets.Clientbound
 {
-    public class SpawnPositionPacket : ClientboundPacket
+    internal class SpawnPositionPacket : ClientboundPacket
     {
         public SpawnPositionPacket(int x, int y, int z)
         {

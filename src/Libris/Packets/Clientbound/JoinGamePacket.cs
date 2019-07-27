@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Libris.Packets.Clientbound
 {
-    public class JoinGamePacket : ClientboundPacket
+    internal class JoinGamePacket : ClientboundPacket
     {
         public JoinGamePacket(int playerEntityId, PlayerGamemode gamemode,
             Dimension dimension, WorldType worldType, int viewDistance, bool verboseDebugInfo = true)

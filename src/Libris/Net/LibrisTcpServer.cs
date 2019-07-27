@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Libris.Net
 {
-    public class LibrisTcpServer
+    internal class LibrisTcpServer
     {
         private readonly TcpListener _tcpListener;
         private readonly IServiceProvider _services;

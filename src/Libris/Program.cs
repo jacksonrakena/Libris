@@ -12,9 +12,9 @@ using System.Threading.Tasks;
 
 namespace Libris
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             new HostBuilder()
                 .ConfigureServices((hostBuilderContext, serviceCollection) =>

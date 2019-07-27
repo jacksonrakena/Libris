@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Libris.Packets.Clientbound
 {
-    public class LoginSuccessPacket: ClientboundPacket
+    internal class LoginSuccessPacket: ClientboundPacket
     {
         public LoginSuccessPacket(string uuid, string username)
         {

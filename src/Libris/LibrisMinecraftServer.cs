@@ -15,11 +15,20 @@ using System.Threading.Tasks;
 
 namespace Libris
 {
+    /// <summary>
+    ///     A Libris server that can receive and respond to connection and play requests.
+    /// </summary>
     public class LibrisMinecraftServer : IHostedService
     {
+        /// <summary>
+        ///     The server version that this Libris server supports. This property is read-only.
+        /// </summary>
         public const string ServerVersion = "1.14.4";
+
+        /// <summary>
+        ///     The protocol version that this Libris server supports. This property is read-only.
+        /// </summary>
         public const int ProtocolVersion = 498;
-        public const int NewConnectionBufferSize = 1024;
 
         /// <summary>
         ///     The maximum number of players allowed to join the server simultaneously.
@@ -43,7 +52,7 @@ namespace Libris
         private readonly ILogger<LibrisMinecraftServer> _logger;
         private readonly IConfiguration _serverConfig;
 
-        public LibrisMinecraftServer(ILogger<LibrisMinecraftServer> logger, LibrisTcpServer tcp, IConfiguration configuration)
+        internal LibrisMinecraftServer(ILogger<LibrisMinecraftServer> logger, LibrisTcpServer tcp, IConfiguration configuration)
         {
             _tcp = tcp;
             _logger = logger;

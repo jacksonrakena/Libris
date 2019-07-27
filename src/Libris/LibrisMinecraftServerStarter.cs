@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Libris
 {
-    public class LibrisMinecraftServerStarter : IHostedService
+    internal class LibrisMinecraftServerStarter : IHostedService
     {
         private readonly LibrisMinecraftServer _backgroundService;
 

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Libris.Net
 {
-    public class LibrisTcpConnection : IDisposable
+    internal class LibrisTcpConnection : IDisposable
     {
         private TcpClient _sender;
         private NetworkStream _stream;
@@ -20,7 +20,7 @@ namespace Libris.Net
         private readonly LibrisMinecraftServer _server;
         private ILogger<LibrisTcpConnection> _logger;
 
-        public LibrisTcpConnection(LibrisMinecraftServer minecraftServer, ILogger<LibrisTcpConnection> logger)
+        internal LibrisTcpConnection(LibrisMinecraftServer minecraftServer, ILogger<LibrisTcpConnection> logger)
         {
             _server = minecraftServer;
             _logger = logger;
