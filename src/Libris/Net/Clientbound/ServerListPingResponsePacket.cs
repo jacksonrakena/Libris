@@ -10,7 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace Libris.Net.Clientbound
 {
-    internal class ServerListPingResponsePacket : ClientboundPacket
+    internal class ServerListPingResponsePacket : IClientboundPacket
     {
         private readonly string _serializedData;
 
@@ -26,7 +26,7 @@ namespace Libris.Net.Clientbound
             Console.WriteLine(_serializedData);
         }
 
-        internal void WriteToStream(NetworkStream stream)
+        public void WriteToStream(NetworkStream stream)
         {
             var serializedDataByteCount = Encoding.UTF8.GetByteCount(_serializedData);
             Span<byte> dataVarIntPrefixBytes = stackalloc byte[5];

@@ -14,13 +14,6 @@ namespace Libris.Utilities
 {
     internal static class Converters
     {
-        public static void WritePacket(this BinaryWriter writer, ClientboundPacket packet)
-        {
-            writer.WriteVariableInteger(packet.Data.Length + 1);
-            writer.Write(packet.Id);
-            writer.Write(packet.Data.Span);
-        }
-
         public static void WriteVariableInteger(this BinaryWriter writer, int value)
         {
             do
@@ -97,6 +90,13 @@ namespace Libris.Utilities
             } while (value != 0);
             buffer.Slice(0, cindex).CopyTo(destination);
             bytesWritten = cindex;
+        }
+
+        public static void GetUInt64Bytes(ulong value, Span<byte> destination)
+        {
+            Span<byte> buffer = BitConverter.GetBytes(value);
+            if (BitConverter.IsLittleEndian) buffer.Reverse();
+            buffer.CopyTo(destination);
         }
 
         public static bool TryGetVarIntBytes(int value, Span<byte> destination)

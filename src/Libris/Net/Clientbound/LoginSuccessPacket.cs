@@ -6,28 +6,40 @@ using System.Text;
 
 namespace Libris.Net.Clientbound
 {
-    internal class LoginSuccessPacket: ClientboundPacket
+    internal class LoginSuccessPacket: IClientboundPacket
     {
         private readonly string _uuid;
         private readonly string _username;
 
         public LoginSuccessPacket(string uuid, string username)
         {
-            Id = OutboundPackets.LoginSuccessPacketId;
-            Data = new byte[uuid.Length + username.Length];
+            _uuid = uuid;
+            _username = username;
         }
 
         public void WriteToStream(NetworkStream stream)
         {
-            Span<byte> data = stackalloc byte[_uuid.Length + _username.Length + 1];
-            data[0] = OutboundPackets.LoginSuccessPacketId;
-            Converters.GetStringBytes(_uuid, data.Slice(1));
-            Converters.GetStringBytes(_username, data.Slice(_uuid.Length + 1));
+            var usernameByteCount = Constants.Encoding.GetByteCount(_username);
+            var uuidByteCount = Constants.Encoding.GetByteCount(_uuid);
 
-            Span<byte> dataLengthBytes = stackalloc byte[5];
-            Converters.GetVarIntBytes(data.Length, dataLengthBytes, out int dataLengthBytesLength);
+            Span<byte> uuidLengthBytes = stackalloc byte[5];
+            Converters.GetVarIntBytes(uuidByteCount, uuidLengthBytes, out int uuidLengthBytesLength);
 
-            stream.Write(dataLengthBytes.Slice(0, dataLengthBytesLength));
+            Span<byte> usernameLengthBytes = stackalloc byte[5];
+            Converters.GetVarIntBytes(usernameByteCount, usernameLengthBytes, out int usernameLengthBytesLength);
+
+            var dataLength = 1 + uuidLengthBytesLength + usernameLengthBytesLength + Constants.Encoding.GetByteCount(_uuid) + Constants.Encoding.GetByteCount(_username);
+
+            Span<byte> packetLengthBytes = stackalloc byte[5];
+            Converters.GetVarIntBytes(uuidLengthBytesLength + usernameLengthBytesLength + 1, packetLengthBytes, out int packetLengthBytesLength); ;
+
+            Span<byte> data = stackalloc byte[dataLength + packetLengthBytesLength];
+            packetLengthBytes.Slice(0, packetLengthBytesLength).CopyTo(data);
+            data[packetLengthBytesLength + 1] = OutboundPackets.LoginSuccessPacketId;
+            uuidLengthBytes.Slice(0, uuidLengthBytesLength).CopyTo(data.Slice(packetLengthBytesLength + 1));
+            Constants.Encoding.GetBytes(_uuid, data.Slice(packetLengthBytesLength + 1 + uuidLengthBytesLength));
+            usernameLengthBytes.Slice(0, usernameLengthBytesLength).CopyTo(data.Slice(packetLengthBytesLength + 1 + uuidLengthBytesLength + uuidByteCount));
+            Constants.Encoding.GetBytes(_username, data.Slice(packetLengthBytesLength + 1 + uuidLengthBytesLength + uuidByteCount + usernameLengthBytesLength));
             stream.Write(data);
         }
     }

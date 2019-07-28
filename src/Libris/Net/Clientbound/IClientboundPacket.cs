@@ -7,9 +7,8 @@ using System.Text;
 
 namespace Libris.Net.Clientbound
 {
-    internal abstract class ClientboundPacket
+    internal interface IClientboundPacket
     {
-        public byte Id { get; protected set; }
-        public Memory<byte> Data { get; protected set; }
+        public void WriteToStream(NetworkStream stream);
     }
 }

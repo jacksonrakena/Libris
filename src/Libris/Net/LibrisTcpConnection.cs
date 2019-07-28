@@ -37,7 +37,6 @@ namespace Libris.Net
         {
             _stream = sender.GetStream();
             _sender = sender;
-            _writer = new BinaryWriter(_stream, Encoding.UTF8, true);
 
              _stream.ReadVarInt(); // packet length
             var packetId = (byte) _stream.ReadByte();
@@ -51,7 +50,6 @@ namespace Libris.Net
             }
             var protocolVersion = _stream.ReadVarInt();
             var serverAddress = _stream.ReadString();
-            Console.WriteLine("Server address: " + serverAddress + " protocol v: " + protocolVersion);
 
             var serverPort = _stream.Read<ushort>();
             var isRequestingStatus = _stream.ReadVarInt() == 1;
@@ -106,7 +104,7 @@ namespace Libris.Net
                 // <Do authorization logic here>
 
                 // Login succeeded
-                _writer.WritePacket(new LoginSuccessPacket("abdc8af6-70ab-4930-ab47-c6fc4e618155", "best_jessica"));
+                new LoginSuccessPacket("abdc8af6-70ab-4930-ab47-c6fc4e618155", "best_jessica").WriteToStream(_stream);
 
                 // Instruct client to join game
                 var joinGamePacket = new JoinGamePacket(0, PlayerGamemode.Survival, Dimension.Overworld, WorldType.Default, 10);

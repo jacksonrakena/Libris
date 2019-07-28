@@ -2,7 +2,7 @@
 
 namespace Libris.Net.Clientbound
 {
-    internal class ServerListPingPongPacket : ClientboundPacket
+    internal class ServerListPingPongPacket : IClientboundPacket
     {
         public ServerListPingPongPacket(long confirmation)
         {

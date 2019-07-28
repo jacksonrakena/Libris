@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Libris.Net.Clientbound
 {
-    internal class PlayerPositionAndLookPacket : ClientboundPacket
+    internal class PlayerPositionAndLookPacket : IClientboundPacket
     {
         public PlayerPositionAndLookPacket(double playerX, double playerY, double playerZ, float yaw, float pitch, byte flags, int teleportConfirmationId)
         {
