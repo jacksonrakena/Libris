@@ -1,31 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
-
-namespace Libris.Models
+﻿namespace Libris.Models
 {
     /// <summary>
     ///     A helper class listing colours that the Minecraft client accepts.
     /// </summary>
-    public static class MinecraftColour
+    public static class MinecraftColour // maybe add an 's' ? I think it should be plurar :p
     {
-        public static string Black => "black";
-        public static string DarkBlue => "dark_blue";
-        public static string DarkGreen => "dark_green";
-        public static string DarkCyan => "dark_aqua";
-        public static string DarkRed => "dark_red";
-        public static string Purple => "dark_purple";
-        public static string Gold => "gold";
-        public static string Gray => "gray";
-        public static string DarkGray => "dark_gray";
-        public static string Blue => "blue";
-        public static string BrightGreen => "green";
-        public static string Cyan => "aqua";
-        public static string Red => "red";
-        public static string Pink => "light_purple";
-        public static string Yellow => "yellow";
-        public static string White => "white";
-        public static string None => "reset";
+        public const string Black = "black";
+        public const string DarkBlue = "dark_blue";
+        public const string DarkGreen = "dark_green";
+        public const string DarkCyan = "dark_aqua";
+        public const string DarkRed = "dark_red";
+        public const string Purple = "dark_purple";
+        public const string Gold = "gold";
+        public const string Gray = "gray";
+        public const string DarkGray = "dark_gray";
+        public const string Blue = "blue";
+        public const string BrightGreen = "green";
+        public const string Cyan = "aqua";
+        public const string Red = "red";
+        public const string Pink = "light_purple";
+        public const string Yellow = "yellow";
+        public const string White = "white";
+        public const string None = "reset";
     }
 }

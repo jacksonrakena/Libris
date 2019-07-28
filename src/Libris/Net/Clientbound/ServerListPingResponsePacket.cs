@@ -23,7 +23,9 @@ namespace Libris.Net.Clientbound
                         serverDescription,
                         faviconString
                     ), new JsonSerializerOptions { IgnoreNullValues = true });
+#if DEBUG // Is this supposed to be shown on release? :thinking:
             Console.WriteLine(_serializedData);
+#endif
         }
 
         internal void WriteToStream(NetworkStream stream)

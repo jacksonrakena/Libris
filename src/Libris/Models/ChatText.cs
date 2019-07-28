@@ -87,6 +87,28 @@ namespace Libris.Models
             return this;
         }
 
+        // I'm not sure if this design looks well. I would recommend to make a builder instead?
+        /***********************************************************************
+         *  Sample:
+         *  public static ChatText Create(Action<ChatText> action)
+         *  {
+         *      if (action == null)
+         *          throw new ArgumentNullException(nameof(action));
+         *          
+         *      var ret = new ChatText();
+         *      action(ret);
+         *      return ret;
+         *  }
+         *  
+         *  Usage:
+         *  var chatText = ChatText.Create(text => 
+         *  {
+         *      text.IsBold = true;
+         *      text.IsItalic = true;
+         *      text.Subcomponent.Add(someComponent);
+         *      // etc...
+         *  });
+         ***********************************************************************/
         public ChatText SetBold(bool value)
         {
             IsBold = value;

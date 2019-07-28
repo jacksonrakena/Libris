@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Libris.Net
 {
-    public class LibrisTcpConnection : IDisposable
+    public class LibrisTcpConnection : IAsyncDisposable
     {
         private TcpClient _sender;
         private NetworkStream _stream;
@@ -25,15 +25,18 @@ namespace Libris.Net
             _logger = logger;
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             _sender.Close();
             _sender.Dispose();
-            _writer.Dispose();
-            _stream.Dispose();
+            await _writer.DisposeAsync();
+            await _stream.DisposeAsync();
         }
 
-        public async Task HandleAsync(TcpClient sender)
+        // Mind considering using ValueTask instead?
+        // The more you avoid async overhead the smoother the server will run
+        // Under various conditions you can avoid Task allocation :d
+        public /*async*/ ValueTask HandleAsync(TcpClient sender)
         {
             _stream = sender.GetStream();
             _sender = sender;
@@ -46,8 +49,7 @@ namespace Libris.Net
             {
                 if (packetId == 0xFE) _logger.LogError("Received 0xFE Legacy Ping packet, the server must have sent the client incorrect data. Skipping.");
                 else _logger.LogError($"Received unknown packet with ID 0x{packetId:x2}. Skipping.");
-                Dispose();
-                return;
+                return DisposeAsync();
             }
             var protocolVersion = _stream.ReadVarInt();
             var serverAddress = _stream.ReadString();
@@ -81,21 +83,20 @@ namespace Libris.Net
                     if (latencyPacketId != InboundPackets.ServerListLatencyPingPacketId)
                     {
                         _logger.LogInformation($"[Status] Closing socket. Client did not request latency detection.");
-                        Dispose();
-                        return;
+                        return DisposeAsync();
                     }
 
                     var payload = _stream.Read<long>();
 
                     _writer.WritePacket(new ServerListPingPongPacket(payload));
-
                     _logger.LogDebug($"[Status] Closing socket.");
-                    Dispose();
+
+                    return DisposeAsync();
                 }
                 catch (EndOfStreamException)
                 {
                     _logger.LogDebug($"[Status] Closing socket. Client did not request latency detection - received End of Stream. Perhaps the response data was corrupt?");
-                    Dispose();
+                    return DisposeAsync();
                 }
             }
             else
@@ -118,8 +119,7 @@ namespace Libris.Net
                 if (clientSettingsId != InboundPackets.ClientSettingsPacketId)
                 {
                     _logger.LogError($"[Login] Expected byte {InboundPackets.ClientSettingsPacketId} Client Settings, received 0x{clientSettingsId:x2} instead. Closing socket.");
-                    Dispose();
-                    return;
+                    return DisposeAsync();
                 }
                 var locale = _stream.ReadString();
                 var viewDistance = _stream.Read<sbyte>();
@@ -146,6 +146,7 @@ namespace Libris.Net
 
                 var ppalPacket = new PlayerPositionAndLookPacket(playerX, playerY, playerZ, yaw, pitch, flags, teleportId);
                 _writer.WritePacket(ppalPacket);
+                return new ValueTask(); // If the method doesn't actually end here, delet dis
             }
         }
     }

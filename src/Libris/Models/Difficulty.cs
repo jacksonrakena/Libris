@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Libris.Models
+﻿namespace Libris.Models
 {
-    public enum Difficulty : int
+    public enum Difficulty //: int not needed, enums defaults to int
     {
         Peaceful = 0,
         Easy = 1,
