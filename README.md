@@ -7,7 +7,7 @@ Libris aims to feature similar levels of plugin support comparable to major Mine
 Libris also has a [Discord server](https://discord.gg/RsRps9M) you can join, for help or discussion (or memes).
 
 ### Goals
-The lead developer of this project is [Abyssal](http://github.com/abyssal512).  
+The lead developer of this project is [Abyssal](http://github.com/abyssal).  
 The project only aims to support the latest mainstream release of Minecraft, which is 1.14.4 (protocol version 498) as of July 27th, 2019.  
 **Completed**
 - [x] Broadcast server on 25565 and send MOTD, player count, and player data
